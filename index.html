@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>ゴルフせどりチェッカー</title>
+<meta name="description" content="GP仕入れ→メルカリ/Yahooフリマ転売の利益チェックアプリ">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="せどりチェッカー">
+<meta name="theme-color" content="#059669">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23059669'/><text x='50' y='65' text-anchor='middle' fill='white' font-size='45'>⛳</text></svg>">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 16px; -webkit-text-size-adjust: 100%; }
+body {
+  font-family: 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', -apple-system, sans-serif;
+  background: #f3f4f6; color: #1f2937;
+  max-width: 480px; margin: 0 auto;
+  min-height: 100dvh; display: flex; flex-direction: column;
+  -webkit-tap-highlight-color: transparent;
+}
+input, select, button { font-family: inherit; font-size: 14px; }
+input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; }
+input[type="number"] { -moz-appearance: textfield; }
+
+/* ─── Header ─── */
+.header { background: linear-gradient(135deg, #059669, #0d9488); color: #fff; padding: 12px 16px; display: flex; align-items: center; gap: 10px; }
+.header-icon { width: 36px; height: 36px; background: rgba(255,255,255,.2); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+.header h1 { font-size: 15px; font-weight: 700; line-height: 1.2; }
+.header p { font-size: 10px; color: #a7f3d0; }
+
+/* ─── Tab Nav ─── */
+.tab-nav { display: flex; background: #fff; border-bottom: 1px solid #e5e7eb; position: sticky; top: 0; z-index: 10; }
+.tab-btn { flex: 1; padding: 10px 0 8px; text-align: center; font-size: 11px; font-weight: 500; color: #9ca3af; border: none; background: none; cursor: pointer; border-bottom: 2px solid transparent; transition: .2s; }
+.tab-btn.active { color: #059669; border-bottom-color: #059669; background: #ecfdf5; }
+.tab-btn svg { display: block; margin: 0 auto 2px; }
+
+/* ─── Cards ─── */
+.card { background: #fff; border-radius: 12px; border: 1px solid #e5e7eb; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,.05); }
+.card-header { padding: 10px 14px; background: #f9fafb; border-bottom: 1px solid #e5e7eb; display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; }
+.card-body { padding: 14px; }
+
+/* ─── Form ─── */
+.form-label { display: block; font-size: 11px; font-weight: 600; color: #6b7280; margin-bottom: 4px; }
+.form-input { width: 100%; padding: 10px 12px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 14px; outline: none; transition: .2s; }
+.form-input:focus { border-color: #059669; box-shadow: 0 0 0 3px rgba(5,150,105,.15); }
+.form-select { width: 100%; padding: 10px 12px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 14px; background: #fff; outline: none; }
+
+/* ─── Buttons ─── */
+.btn-primary { width: 100%; padding: 13px; background: #059669; color: #fff; border: none; border-radius: 12px; font-size: 14px; font-weight: 700; cursor: pointer; transition: .2s; }
+.btn-primary:active { background: #047857; transform: scale(.98); }
+.btn-primary:disabled { opacity: .4; }
+
+/* ─── Search Links ─── */
+.search-link { display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; border-radius: 10px; text-decoration: none; transition: .15s; border: 1px solid; }
+.search-link:active { transform: scale(.98); }
+.search-link-mercari { background: #fef2f2; border-color: #fecaca; color: #b91c1c; }
+.search-link-yahoo { background: #fefce8; border-color: #fde68a; color: #92400e; }
+.search-link-icon { width: 28px; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 12px; font-weight: 700; }
+
+/* ─── Profit ─── */
+.profit-breakdown { background: #f9fafb; border-radius: 8px; padding: 10px 12px; font-size: 12px; }
+.profit-row { display: flex; justify-content: space-between; padding: 3px 0; }
+.profit-total { border-top: 1px solid #d1d5db; margin-top: 6px; padding-top: 8px; font-size: 14px; font-weight: 700; }
+.badge { display: inline-block; padding: 2px 8px; border-radius: 99px; font-size: 11px; font-weight: 700; }
+.badge-green { background: #dcfce7; color: #15803d; }
+.badge-red { background: #fee2e2; color: #dc2626; }
+
+/* ─── Shipping chips ─── */
+.ship-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.ship-chip { padding: 7px 10px; border-radius: 8px; font-size: 11px; font-weight: 500; border: none; cursor: pointer; transition: .15s; background: #f3f4f6; color: #4b5563; }
+.ship-chip.active { background: #059669; color: #fff; }
+
+/* ─── Verdict ─── */
+.verdict { border-radius: 12px; padding: 16px; text-align: center; border: 1px solid; }
+.verdict-ok { background: #f0fdf4; border-color: #bbf7d0; }
+.verdict-ng { background: #fef2f2; border-color: #fecaca; }
+.verdict h2 { font-size: 22px; margin-bottom: 4px; }
+.verdict p { font-size: 12px; color: #6b7280; }
+
+/* ─── History ─── */
+.history-item { background: #fff; border-radius: 12px; border: 1px solid #e5e7eb; overflow: hidden; }
+.history-top { padding: 10px 12px; display: flex; gap: 10px; }
+.history-thumb { width: 50px; height: 50px; object-fit: cover; border-radius: 8px; border: 1px solid #e5e7eb; flex-shrink: 0; }
+.history-stats { display: flex; gap: 6px; padding: 0 10px 10px; }
+.history-stat { flex: 1; text-align: center; padding: 8px 4px; border-radius: 8px; font-size: 11px; }
+
+/* ─── Photo area ─── */
+.photo-area { padding: 24px 16px; display: flex; flex-direction: column; align-items: center; gap: 12px; }
+.photo-circle { width: 64px; height: 64px; background: #ecfdf5; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; }
+.photo-preview { width: 100%; max-height: 200px; object-fit: contain; background: #111; display: block; }
+.photo-close { position: absolute; top: 8px; right: 8px; width: 28px; height: 28px; background: rgba(0,0,0,.6); color: #fff; border: none; border-radius: 50%; font-size: 16px; cursor: pointer; }
+
+/* ─── Summary card ─── */
+.summary-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; text-align: center; }
+.summary-grid p:first-child { font-size: 11px; color: #6b7280; }
+.summary-grid p:last-child { font-size: 18px; font-weight: 700; }
+
+/* ─── Utilities ─── */
+.flex { display: flex; } .gap-2 { gap: 8px; } .gap-3 { gap: 12px; } .flex-1 { flex: 1; }
+.mt-2 { margin-top: 8px; } .mt-3 { margin-top: 12px; }
+.text-green { color: #16a34a; } .text-red { color: #dc2626; } .text-gray { color: #9ca3af; }
+.text-xs { font-size: 11px; } .text-sm { font-size: 13px; } .text-center { text-align: center; }
+.font-bold { font-weight: 700; } .truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.px-3 { padding-left: 12px; padding-right: 12px; } .py-2 { padding-top: 8px; padding-bottom: 8px; }
+.space-y > * + * { margin-top: 12px; }
+.tag { display: inline-block; padding: 2px 8px; background: #f3f4f6; border-radius: 4px; font-size: 11px; }
+.main { flex: 1; overflow-y: auto; padding: 14px; }
+.price-input-wrap { position: relative; }
+.price-input-wrap .yen { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #9ca3af; font-size: 14px; pointer-events: none; }
+.price-input-wrap input { padding-left: 28px; }
+.hidden { display: none; }
+.btn-row { display: flex; gap: 8px; }
+.btn-row button { flex: 1; }
+.btn-outline { padding: 13px; background: #fff; color: #4b5563; border: 1px solid #d1d5db; border-radius: 12px; font-size: 14px; font-weight: 500; cursor: pointer; }
+.btn-link-small { font-size: 11px; color: inherit; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 4px; padding: 6px; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useRef, useCallback } = React;
+
+// ─── 定数 ───
+const MERCARI_FEE = 0.1;
+const YAHOO_FEE = 0.05;
+const SHIPPING = [
+  { label: "ネコポス", value: 210 },
+  { label: "ゆうパケット", value: 230 },
+  { label: "宅急便60", value: 750 },
+  { label: "宅急便80", value: 850 },
+  { label: "宅急便100", value: 1050 },
+  { label: "ゆうパック80", value: 1100 },
+  { label: "カスタム", value: 0 },
+];
+const CATEGORIES = ["パター","ドライバー","FW","UT","アイアン","ウェッジ","シューズ","バッグ","距離計","その他"];
+const CONDITIONS = ["N","A","B","C","D","E"];
+
+// ─── SVG Icons ───
+const Icon = ({ d, size=18 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d={d}/>
+  </svg>
+);
+const CameraIcon = () => <Icon d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2zM12 17a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/>;
+const CalcIcon = () => <Icon d="M4 2h16a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2zM8 6v4M6 8h4M6 18h4M14 6h4M15.5 14l3 3M18.5 14l-3 3"/>;
+const HistoryIcon = () => <Icon d="M12 8v4l3 3M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8M3 3v5h5"/>;
+const ExtIcon = ({size=14}) => <Icon d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3" size={size}/>;
+const TrashIcon = () => <Icon d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" size={14}/>;
+const SearchIcon = () => <Icon d="M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16zM21 21l-4.35-4.35"/>;
+
+// ─── 利益計算 ───
+function calcProfit(sellPrice, fee, shippingCost, costPrice) {
+  const sell = parseInt(sellPrice) || 0;
+  const gp = parseInt(costPrice) || 0;
+  const commission = Math.floor(sell * fee);
+  const profit = sell - commission - shippingCost - gp;
+  const rate = gp > 0 ? (profit / gp * 100) : 0;
+  return { sell, commission, profit, rate };
+}
+
+// ─── Badge ───
+function ProfitBadge({ profit }) {
+  if (!profit && profit !== 0) return null;
+  const cls = profit > 0 ? "badge badge-green" : profit < 0 ? "badge badge-red" : "badge";
+  const txt = profit > 0 ? `+¥${profit.toLocaleString()}` : profit < 0 ? `¥${profit.toLocaleString()}` : "±0";
+  return <span className={cls}>{txt}</span>;
+}
+
+// ─── Main App ───
+function App() {
+  const [screen, setScreen] = useState("scan");
+  const [photo, setPhoto] = useState(null);
+  const [productName, setProductName] = useState("");
+  const [category, setCategory] = useState("パター");
+  const [gpPrice, setGpPrice] = useState("");
+  const [condition, setCondition] = useState("C");
+  const [shipIdx, setShipIdx] = useState(3);
+  const [customShip, setCustomShip] = useState("");
+  const [mercariPrice, setMercariPrice] = useState("");
+  const [yahooPrice, setYahooPrice] = useState("");
+  const [history, setHistory] = useState([]);
+  const fileRef = useRef(null);
+
+  const ship = SHIPPING[shipIdx].label === "カスタム" ? (parseInt(customShip)||0) : SHIPPING[shipIdx].value;
+  const mc = calcProfit(mercariPrice, MERCARI_FEE, ship, gpPrice);
+  const yc = calcProfit(yahooPrice, YAHOO_FEE, ship, gpPrice);
+  const mercariUrl = productName ? `https://jp.mercari.com/search?keyword=${encodeURIComponent(productName)}&status=sold_out` : "";
+  const yahooUrl = productName ? `https://paypayfleamarket.yahoo.co.jp/search/${encodeURIComponent(productName)}?sold=1` : "";
+
+  const handlePhoto = (e) => {
+    const f = e.target.files?.[0];
+    if (f) { const r = new FileReader(); r.onload = (ev) => setPhoto(ev.target.result); r.readAsDataURL(f); }
+  };
+
+  const saveResult = () => {
+    if (!productName || !gpPrice) return;
+    setHistory(prev => [{ id: Date.now(), date: new Date().toLocaleString("ja-JP"), productName, category, condition, gpPrice: parseInt(gpPrice)||0, mercariPrice: parseInt(mercariPrice)||0, yahooPrice: parseInt(yahooPrice)||0, mercariProfit: mc.profit, yahooProfit: yc.profit, ship, photo }, ...prev].slice(0, 50));
+    resetForm(); setScreen("history");
+  };
+
+  const resetForm = () => { setPhoto(null); setProductName(""); setGpPrice(""); setMercariPrice(""); setYahooPrice(""); };
+
+  // ─── TAB ICONS ───
+  const tabs = [
+    { id:"scan", icon:<CameraIcon/>, label:"撮影・入力" },
+    { id:"calc", icon:<CalcIcon/>, label:"利益計算" },
+    { id:"history", icon:<HistoryIcon/>, label:"履歴" },
+  ];
+
+  return (
+    <>
+      {/* Header */}
+      <div className="header">
+        <div className="header-icon">⛳</div>
+        <div><h1>ゴルフせどりチェッカー</h1><p>GP仕入れ → メルカリ / Yahoo転売</p></div>
+      </div>
+
+      {/* Tab Nav */}
+      <nav className="tab-nav">
+        {tabs.map(t => (
+          <button key={t.id} className={`tab-btn ${screen===t.id?"active":""}`} onClick={()=>setScreen(t.id)}>
+            {t.icon}<span>{t.label}</span>
+          </button>
+        ))}
+      </nav>
+
+      {/* Main */}
+      <div className="main">
+        <div className="space-y">
+
+        {/* ═══ SCAN SCREEN ═══ */}
+        {screen === "scan" && <>
+          {/* Photo */}
+          <div className="card">
+            <div className="card-header">📷 Step 1: 値札を撮影</div>
+            {photo ? (
+              <div style={{position:"relative"}}>
+                <img src={photo} alt="値札" className="photo-preview"/>
+                <button className="photo-close" onClick={()=>setPhoto(null)}>✕</button>
+              </div>
+            ) : (
+              <div className="photo-area">
+                <div className="photo-circle">📷</div>
+                <p className="text-sm text-gray" style={{textAlign:"center"}}>GP店舗の値札を撮影してください</p>
+                <div className="flex gap-2">
+                  <button className="btn-primary" style={{width:"auto",padding:"10px 20px",fontSize:13}} onClick={()=>{fileRef.current.setAttribute('capture','environment');fileRef.current.click()}}>
+                    📷 撮影する
+                  </button>
+                  <button className="btn-outline" style={{padding:"10px 20px",fontSize:13}} onClick={()=>{fileRef.current.removeAttribute('capture');fileRef.current.click()}}>
+                    🖼 画像選択
+                  </button>
+                </div>
+                <input ref={fileRef} type="file" accept="image/*" onChange={handlePhoto} className="hidden"/>
+              </div>
+            )}
+          </div>
+
+          {/* Product Info */}
+          <div className="card">
+            <div className="card-header">🔍 Step 2: 商品情報を入力</div>
+            <div className="card-body space-y">
+              <div>
+                <label className="form-label">商品名（検索キーワード）</label>
+                <input type="text" className="form-input" value={productName} onChange={e=>setProductName(e.target.value)} placeholder="例: スコッティキャメロン Super Select Newport 2"/>
+              </div>
+              <div className="flex gap-2">
+                <div className="flex-1">
+                  <label className="form-label">カテゴリ</label>
+                  <select className="form-select" value={category} onChange={e=>setCategory(e.target.value)}>
+                    {CATEGORIES.map(c=><option key={c}>{c}</option>)}
+                  </select>
+                </div>
+                <div style={{width:80}}>
+                  <label className="form-label">状態</label>
+                  <select className="form-select" value={condition} onChange={e=>setCondition(e.target.value)}>
+                    {CONDITIONS.map(c=><option key={c}>{c}</option>)}
+                  </select>
+                </div>
+              </div>
+              <div>
+                <label className="form-label">GP仕入れ価格（税込）</label>
+                <div className="price-input-wrap">
+                  <span className="yen">¥</span>
+                  <input type="number" className="form-input" value={gpPrice} onChange={e=>setGpPrice(e.target.value)} placeholder="0" inputMode="numeric"/>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Search Links */}
+          <div className="card">
+            <div className="card-header">🔗 Step 3: 売却相場を調べる</div>
+            <div className="card-body space-y">
+              {!productName ? (
+                <p className="text-xs text-gray text-center" style={{padding:"8px 0"}}>商品名を入力すると検索できます</p>
+              ) : (<>
+                <a href={mercariUrl} target="_blank" rel="noopener" className="search-link search-link-mercari">
+                  <div className="flex gap-2" style={{alignItems:"center"}}>
+                    <div className="search-link-icon" style={{background:"#ef4444"}}>M</div>
+                    <div><div className="text-sm font-bold">メルカリで検索</div><div className="text-xs" style={{color:"#f87171"}}>売却済み商品を表示</div></div>
+                  </div>
+                  <ExtIcon/>
+                </a>
+                <a href={yahooUrl} target="_blank" rel="noopener" className="search-link search-link-yahoo">
+                  <div className="flex gap-2" style={{alignItems:"center"}}>
+                    <div className="search-link-icon" style={{background:"#eab308"}}>Y</div>
+                    <div><div className="text-sm font-bold">Yahoo!フリマで検索</div><div className="text-xs" style={{color:"#ca8a04"}}>売却済み商品を表示</div></div>
+                  </div>
+                  <ExtIcon/>
+                </a>
+                <p className="text-xs text-gray text-center">相場を確認したら「利益計算」タブで価格を入力</p>
+              </>)}
+            </div>
+          </div>
+
+          {productName && gpPrice && (
+            <button className="btn-primary" onClick={()=>setScreen("calc")}>利益計算に進む →</button>
+          )}
+        </>}
+
+        {/* ═══ CALC SCREEN ═══ */}
+        {screen === "calc" && <>
+          {/* Summary */}
+          <div className="card">
+            <div className="card-body">
+              <div className="flex gap-3">
+                {photo && <img src={photo} alt="" className="history-thumb"/>}
+                <div style={{minWidth:0,flex:1}}>
+                  <div className="text-sm font-bold truncate">{productName || "（商品名未入力）"}</div>
+                  <div className="flex gap-2 mt-2">
+                    <span className="tag">{category}</span><span className="tag">状態{condition}</span>
+                  </div>
+                  <div className="font-bold mt-2" style={{fontSize:17,color:"#059669"}}>GP仕入: ¥{(parseInt(gpPrice)||0).toLocaleString()}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Shipping */}
+          <div className="card">
+            <div className="card-header" style={{fontSize:12}}>📦 送料設定</div>
+            <div className="card-body">
+              <div className="ship-chips">
+                {SHIPPING.map((s,i) => (
+                  <button key={s.label} className={`ship-chip ${shipIdx===i?"active":""}`} onClick={()=>setShipIdx(i)}>
+                    {s.label}{s.value>0?` ¥${s.value}`:""}
+                  </button>
+                ))}
+              </div>
+              {SHIPPING[shipIdx].label==="カスタム" && (
+                <input type="number" className="form-input mt-2" value={customShip} onChange={e=>setCustomShip(e.target.value)} placeholder="送料を入力" inputMode="numeric"/>
+              )}
+            </div>
+          </div>
+
+          {/* Mercari Calc */}
+          <div className="card">
+            <div className="card-header" style={{background:"#fef2f2"}}>
+              <div className="search-link-icon" style={{background:"#ef4444",width:24,height:24,fontSize:11}}>M</div>
+              <span style={{color:"#b91c1c",flex:1}}>メルカリ <span className="text-xs" style={{fontWeight:400}}>手数料10%</span></span>
+              {mercariPrice && <ProfitBadge profit={mc.profit}/>}
+            </div>
+            <div className="card-body space-y">
+              <div>
+                <label className="form-label">想定売却価格</label>
+                <div className="price-input-wrap">
+                  <span className="yen">¥</span>
+                  <input type="number" className="form-input" value={mercariPrice} onChange={e=>setMercariPrice(e.target.value)} placeholder="メルカリの相場価格を入力" inputMode="numeric"/>
+                </div>
+              </div>
+              {mercariPrice && (
+                <div className="profit-breakdown">
+                  <div className="profit-row"><span className="text-gray">売却価格</span><span>¥{mc.sell.toLocaleString()}</span></div>
+                  <div className="profit-row"><span className="text-gray">手数料 (10%)</span><span className="text-red">-¥{mc.commission.toLocaleString()}</span></div>
+                  <div className="profit-row"><span className="text-gray">送料</span><span className="text-red">-¥{ship.toLocaleString()}</span></div>
+                  <div className="profit-row"><span className="text-gray">仕入原価</span><span className="text-red">-¥{(parseInt(gpPrice)||0).toLocaleString()}</span></div>
+                  <div className="profit-row profit-total">
+                    <span>利益</span>
+                    <span className={mc.profit>=0?"text-green":"text-red"}>¥{mc.profit.toLocaleString()} ({mc.rate.toFixed(1)}%)</span>
+                  </div>
+                </div>
+              )}
+              {productName && <a href={mercariUrl} target="_blank" rel="noopener" className="btn-link-small" style={{color:"#ef4444"}}>🔗 メルカリで相場を確認</a>}
+            </div>
+          </div>
+
+          {/* Yahoo Calc */}
+          <div className="card">
+            <div className="card-header" style={{background:"#fefce8"}}>
+              <div className="search-link-icon" style={{background:"#eab308",width:24,height:24,fontSize:11}}>Y</div>
+              <span style={{color:"#92400e",flex:1}}>Yahoo!フリマ <span className="text-xs" style={{fontWeight:400}}>手数料5%</span></span>
+              {yahooPrice && <ProfitBadge profit={yc.profit}/>}
+            </div>
+            <div className="card-body space-y">
+              <div>
+                <label className="form-label">想定売却価格</label>
+                <div className="price-input-wrap">
+                  <span className="yen">¥</span>
+                  <input type="number" className="form-input" value={yahooPrice} onChange={e=>setYahooPrice(e.target.value)} placeholder="Yahoo!フリマの相場価格を入力" inputMode="numeric"/>
+                </div>
+              </div>
+              {yahooPrice && (
+                <div className="profit-breakdown">
+                  <div className="profit-row"><span className="text-gray">売却価格</span><span>¥{yc.sell.toLocaleString()}</span></div>
+                  <div className="profit-row"><span className="text-gray">手数料 (5%)</span><span className="text-red">-¥{yc.commission.toLocaleString()}</span></div>
+                  <div className="profit-row"><span className="text-gray">送料</span><span className="text-red">-¥{ship.toLocaleString()}</span></div>
+                  <div className="profit-row"><span className="text-gray">仕入原価</span><span className="text-red">-¥{(parseInt(gpPrice)||0).toLocaleString()}</span></div>
+                  <div className="profit-row profit-total">
+                    <span>利益</span>
+                    <span className={yc.profit>=0?"text-green":"text-red"}>¥{yc.profit.toLocaleString()} ({yc.rate.toFixed(1)}%)</span>
+                  </div>
+                </div>
+              )}
+              {productName && <a href={yahooUrl} target="_blank" rel="noopener" className="btn-link-small" style={{color:"#ca8a04"}}>🔗 Yahoo!フリマで相場を確認</a>}
+            </div>
+          </div>
+
+          {/* Verdict */}
+          {(mercariPrice || yahooPrice) && (() => {
+            const best = Math.max(mc.profit, yc.profit);
+            const where = mc.profit >= yc.profit ? "メルカリ" : "Yahoo!フリマ";
+            return (
+              <div className={`verdict ${best>0?"verdict-ok":"verdict-ng"}`}>
+                <h2>{best > 0 ? "🟢 仕入れOK" : "🔴 見送り推奨"}</h2>
+                <p>{best > 0 ? `最大利益 ¥${best.toLocaleString()} (${where})` : "現在の価格では利益が出ません"}</p>
+              </div>
+            );
+          })()}
+
+          <div className="btn-row">
+            <button className="btn-outline" onClick={()=>setScreen("scan")}>← 入力に戻る</button>
+            <button className="btn-primary" onClick={saveResult} disabled={!productName||!gpPrice}>履歴に保存</button>
+          </div>
+        </>}
+
+        {/* ═══ HISTORY SCREEN ═══ */}
+        {screen === "history" && <>
+          <div className="flex" style={{justifyContent:"space-between",alignItems:"center"}}>
+            <span className="text-sm font-bold" style={{color:"#4b5563"}}>チェック履歴 ({history.length}件)</span>
+            {history.length > 0 && (
+              <button onClick={()=>setHistory([])} style={{border:"none",background:"none",color:"#f87171",fontSize:12,cursor:"pointer",display:"flex",alignItems:"center",gap:4}}>
+                <TrashIcon/> 全削除
+              </button>
+            )}
+          </div>
+
+          {history.length === 0 ? (
+            <div className="card" style={{padding:"32px 16px",textAlign:"center"}}>
+              <div style={{fontSize:32,color:"#d1d5db",marginBottom:8}}>📋</div>
+              <p className="text-sm text-gray">まだ履歴がありません</p>
+              <p className="text-xs text-gray mt-2">商品をチェックすると、ここに保存されます</p>
+            </div>
+          ) : (<>
+            {history.map(item => {
+              const bestProfit = Math.max(item.mercariProfit, item.yahooProfit);
+              return (
+                <div key={item.id} className="history-item">
+                  <div className="history-top">
+                    {item.photo && <img src={item.photo} alt="" className="history-thumb"/>}
+                    <div style={{minWidth:0,flex:1}}>
+                      <div className="text-sm font-bold truncate">{item.productName}</div>
+                      <div className="flex gap-2" style={{marginTop:3}}><span className="tag">{item.category}</span><span className="tag">状態{item.condition}</span></div>
+                      <div className="text-xs text-gray" style={{marginTop:3}}>{item.date}</div>
+                    </div>
+                  </div>
+                  <div className="history-stats">
+                    <div className="history-stat" style={{background:"#f9fafb"}}>
+                      <div className="text-xs text-gray">GP仕入</div>
+                      <div className="text-sm font-bold">¥{item.gpPrice.toLocaleString()}</div>
+                    </div>
+                    <div className="history-stat" style={{background:item.mercariProfit>=0?"#f0fdf4":"#fef2f2"}}>
+                      <div className="text-xs text-gray">メルカリ</div>
+                      <div className={`text-sm font-bold ${item.mercariProfit>=0?"text-green":"text-red"}`}>
+                        {item.mercariPrice > 0 ? `¥${item.mercariProfit.toLocaleString()}` : "-"}
+                      </div>
+                    </div>
+                    <div className="history-stat" style={{background:item.yahooProfit>=0?"#f0fdf4":"#fef2f2"}}>
+                      <div className="text-xs text-gray">Yahoo</div>
+                      <div className={`text-sm font-bold ${item.yahooProfit>=0?"text-green":"text-red"}`}>
+                        {item.yahooPrice > 0 ? `¥${item.yahooProfit.toLocaleString()}` : "-"}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+
+            {/* Summary */}
+            <div className="card" style={{background:"#ecfdf5",borderColor:"#a7f3d0"}}>
+              <div className="card-body">
+                <div className="text-sm font-bold" style={{color:"#059669",marginBottom:10}}>今日のまとめ</div>
+                <div className="summary-grid">
+                  <div><p>チェック数</p><p style={{color:"#059669"}}>{history.length}</p></div>
+                  <div><p>利益あり</p><p className="text-green">{history.filter(h=>Math.max(h.mercariProfit,h.yahooProfit)>0).length}</p></div>
+                  <div><p>最大利益</p><p className="text-green">¥{Math.max(0,...history.map(h=>Math.max(h.mercariProfit,h.yahooProfit))).toLocaleString()}</p></div>
+                </div>
+              </div>
+            </div>
+          </>)}
+        </>}
+
+        </div>
+      </div>
+    </>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+</body>
+</html>
