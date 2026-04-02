@@ -2,516 +2,1052 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>ゴルフせどりチェッカー</title>
-<meta name="description" content="GP仕入れ→メルカリ/Yahooフリマ転売の利益チェックアプリ">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="せどりチェッカー">
-<meta name="theme-color" content="#059669">
-<link rel="manifest" href="manifest.json">
-<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23059669'/><text x='50' y='65' text-anchor='middle' fill='white' font-size='45'>⛳</text></svg>">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>ã´ã«ããã©ã OCR</title>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 <style>
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { font-size: 16px; -webkit-text-size-adjust: 100%; }
-body {
-  font-family: 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', -apple-system, sans-serif;
-  background: #f3f4f6; color: #1f2937;
-  max-width: 480px; margin: 0 auto;
-  min-height: 100dvh; display: flex; flex-direction: column;
-  -webkit-tap-highlight-color: transparent;
-}
-input, select, button { font-family: inherit; font-size: 14px; }
-input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; }
-input[type="number"] { -moz-appearance: textfield; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
 
-/* ─── Header ─── */
-.header { background: linear-gradient(135deg, #059669, #0d9488); color: #fff; padding: 12px 16px; display: flex; align-items: center; gap: 10px; }
-.header-icon { width: 36px; height: 36px; background: rgba(255,255,255,.2); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
-.header h1 { font-size: 15px; font-weight: 700; line-height: 1.2; }
-.header p { font-size: 10px; color: #a7f3d0; }
+  :root {
+    --bg: #0c1117;
+    --card: #161b22;
+    --border: #30363d;
+    --green: #2ea043;
+    --green-bright: #3fb950;
+    --blue: #388bfd;
+    --text: #e6edf3;
+    --text-muted: #8b949e;
+    --orange: #d29922;
+    --red: #f85149;
+  }
 
-/* ─── Tab Nav ─── */
-.tab-nav { display: flex; background: #fff; border-bottom: 1px solid #e5e7eb; position: sticky; top: 0; z-index: 10; }
-.tab-btn { flex: 1; padding: 10px 0 8px; text-align: center; font-size: 11px; font-weight: 500; color: #9ca3af; border: none; background: none; cursor: pointer; border-bottom: 2px solid transparent; transition: .2s; }
-.tab-btn.active { color: #059669; border-bottom-color: #059669; background: #ecfdf5; }
-.tab-btn svg { display: block; margin: 0 auto 2px; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', Meiryo, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    max-width: 480px;
+    margin: 0 auto;
+    padding-bottom: 80px;
+  }
 
-/* ─── Cards ─── */
-.card { background: #fff; border-radius: 12px; border: 1px solid #e5e7eb; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,.05); }
-.card-header { padding: 10px 14px; background: #f9fafb; border-bottom: 1px solid #e5e7eb; display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; }
-.card-body { padding: 14px; }
+  /* ===== Header ===== */
+  .app-header {
+    background: linear-gradient(135deg, #1a472a 0%, #0d2818 100%);
+    padding: 20px 16px 18px;
+    border-bottom: 1px solid #2ea04330;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
 
-/* ─── Form ─── */
-.form-label { display: block; font-size: 11px; font-weight: 600; color: #6b7280; margin-bottom: 4px; }
-.form-input { width: 100%; padding: 10px 12px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 14px; outline: none; transition: .2s; }
-.form-input:focus { border-color: #059669; box-shadow: 0 0 0 3px rgba(5,150,105,.15); }
-.form-select { width: 100%; padding: 10px 12px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 14px; background: #fff; outline: none; }
+  .app-header .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
 
-/* ─── Buttons ─── */
-.btn-primary { width: 100%; padding: 13px; background: #059669; color: #fff; border: none; border-radius: 12px; font-size: 14px; font-weight: 700; cursor: pointer; transition: .2s; }
-.btn-primary:active { background: #047857; transform: scale(.98); }
-.btn-primary:disabled { opacity: .4; }
+  .app-header .logo-icon {
+    width: 36px;
+    height: 36px;
+    background: var(--green);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+  }
 
-/* ─── Search Links ─── */
-.search-link { display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; border-radius: 10px; text-decoration: none; transition: .15s; border: 1px solid; }
-.search-link:active { transform: scale(.98); }
-.search-link-mercari { background: #fef2f2; border-color: #fecaca; color: #b91c1c; }
-.search-link-yahoo { background: #fefce8; border-color: #fde68a; color: #92400e; }
-.search-link-icon { width: 28px; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 12px; font-weight: 700; }
+  .app-header h1 {
+    font-size: 18px;
+    font-weight: 700;
+    color: #fff;
+  }
 
-/* ─── Profit ─── */
-.profit-breakdown { background: #f9fafb; border-radius: 8px; padding: 10px 12px; font-size: 12px; }
-.profit-row { display: flex; justify-content: space-between; padding: 3px 0; }
-.profit-total { border-top: 1px solid #d1d5db; margin-top: 6px; padding-top: 8px; font-size: 14px; font-weight: 700; }
-.badge { display: inline-block; padding: 2px 8px; border-radius: 99px; font-size: 11px; font-weight: 700; }
-.badge-green { background: #dcfce7; color: #15803d; }
-.badge-red { background: #fee2e2; color: #dc2626; }
+  .app-header .subtitle {
+    font-size: 11px;
+    color: var(--green-bright);
+    font-weight: 500;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
 
-/* ─── Shipping chips ─── */
-.ship-chips { display: flex; flex-wrap: wrap; gap: 6px; }
-.ship-chip { padding: 7px 10px; border-radius: 8px; font-size: 11px; font-weight: 500; border: none; cursor: pointer; transition: .15s; background: #f3f4f6; color: #4b5563; }
-.ship-chip.active { background: #059669; color: #fff; }
+  /* ===== Tab Navigation ===== */
+  .tabs {
+    display: flex;
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+  }
 
-/* ─── Verdict ─── */
-.verdict { border-radius: 12px; padding: 16px; text-align: center; border: 1px solid; }
-.verdict-ok { background: #f0fdf4; border-color: #bbf7d0; }
-.verdict-ng { background: #fef2f2; border-color: #fecaca; }
-.verdict h2 { font-size: 22px; margin-bottom: 4px; }
-.verdict p { font-size: 12px; color: #6b7280; }
+  .tab {
+    flex: 1;
+    padding: 12px 8px;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-muted);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+    -webkit-tap-highlight-color: transparent;
+  }
 
-/* ─── History ─── */
-.history-item { background: #fff; border-radius: 12px; border: 1px solid #e5e7eb; overflow: hidden; }
-.history-top { padding: 10px 12px; display: flex; gap: 10px; }
-.history-thumb { width: 50px; height: 50px; object-fit: cover; border-radius: 8px; border: 1px solid #e5e7eb; flex-shrink: 0; }
-.history-stats { display: flex; gap: 6px; padding: 0 10px 10px; }
-.history-stat { flex: 1; text-align: center; padding: 8px 4px; border-radius: 8px; font-size: 11px; }
+  .tab.active {
+    color: var(--green-bright);
+    border-bottom-color: var(--green-bright);
+  }
 
-/* ─── Photo area ─── */
-.photo-area { padding: 24px 16px; display: flex; flex-direction: column; align-items: center; gap: 12px; }
-.photo-circle { width: 64px; height: 64px; background: #ecfdf5; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; }
-.photo-preview { width: 100%; max-height: 200px; object-fit: contain; background: #111; display: block; }
-.photo-close { position: absolute; top: 8px; right: 8px; width: 28px; height: 28px; background: rgba(0,0,0,.6); color: #fff; border: none; border-radius: 50%; font-size: 16px; cursor: pointer; }
+  /* ===== Main Content ===== */
+  .page { display: none; padding: 16px; }
+  .page.active { display: block; }
 
-/* ─── Summary card ─── */
-.summary-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; text-align: center; }
-.summary-grid p:first-child { font-size: 11px; color: #6b7280; }
-.summary-grid p:last-child { font-size: 18px; font-weight: 700; }
+  /* ===== Capture Area ===== */
+  .capture-area {
+    border: 2px dashed var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    background: var(--card);
+    min-height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: border-color 0.3s;
+    position: relative;
+  }
 
-/* ─── Utilities ─── */
-.flex { display: flex; } .gap-2 { gap: 8px; } .gap-3 { gap: 12px; } .flex-1 { flex: 1; }
-.mt-2 { margin-top: 8px; } .mt-3 { margin-top: 12px; }
-.text-green { color: #16a34a; } .text-red { color: #dc2626; } .text-gray { color: #9ca3af; }
-.text-xs { font-size: 11px; } .text-sm { font-size: 13px; } .text-center { text-align: center; }
-.font-bold { font-weight: 700; } .truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.px-3 { padding-left: 12px; padding-right: 12px; } .py-2 { padding-top: 8px; padding-bottom: 8px; }
-.space-y > * + * { margin-top: 12px; }
-.tag { display: inline-block; padding: 2px 8px; background: #f3f4f6; border-radius: 4px; font-size: 11px; }
-.main { flex: 1; overflow-y: auto; padding: 14px; }
-.price-input-wrap { position: relative; }
-.price-input-wrap .yen { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #9ca3af; font-size: 14px; pointer-events: none; }
-.price-input-wrap input { padding-left: 28px; }
-.hidden { display: none; }
-.btn-row { display: flex; gap: 8px; }
-.btn-row button { flex: 1; }
-.btn-outline { padding: 13px; background: #fff; color: #4b5563; border: 1px solid #d1d5db; border-radius: 12px; font-size: 14px; font-weight: 500; cursor: pointer; }
-.btn-link-small { font-size: 11px; color: inherit; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 4px; padding: 6px; }
+  .capture-area.has-image { border-color: var(--green); }
+
+  .capture-area img {
+    max-width: 100%;
+    max-height: 350px;
+    display: block;
+  }
+
+  .placeholder {
+    text-align: center;
+    padding: 36px 20px;
+  }
+
+  .placeholder .icon { font-size: 44px; margin-bottom: 10px; }
+
+  .placeholder p {
+    color: var(--text-muted);
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  .placeholder .hint {
+    font-size: 12px;
+    color: #484f58;
+    margin-top: 8px;
+  }
+
+  /* ===== Buttons ===== */
+  .btn-row { display: flex; gap: 10px; margin: 14px 0; }
+
+  .btn {
+    flex: 1;
+    padding: 13px 14px;
+    border: none;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: transform 0.1s;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .btn:active { transform: scale(0.97); }
+
+  .btn-camera { background: var(--green); color: #fff; }
+  .btn-gallery { background: var(--card); color: var(--text); border: 1px solid var(--border); }
+
+  .btn-scan {
+    width: 100%;
+    padding: 15px;
+    background: linear-gradient(135deg, #238636, #1a7f37);
+    color: #fff;
+    font-size: 15px;
+    font-weight: 700;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: transform 0.1s;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .btn-scan:active { transform: scale(0.97); }
+  .btn-scan:disabled { opacity: 0.6; }
+  .btn-scan.visible { display: flex; }
+
+  /* ===== Progress ===== */
+  .progress-container { display: none; margin: 14px 0; }
+  .progress-container.visible { display: block; }
+
+  .progress-bar-bg {
+    background: var(--card);
+    border-radius: 8px;
+    height: 6px;
+    overflow: hidden;
+  }
+
+  .progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--green), var(--green-bright));
+    border-radius: 8px;
+    width: 0%;
+    transition: width 0.3s ease;
+  }
+
+  .progress-label {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 6px;
+    text-align: center;
+  }
+
+  /* ===== Model Number Card ===== */
+  .model-card {
+    display: none;
+    background: var(--card);
+    border: 1px solid var(--green);
+    border-radius: 14px;
+    margin-top: 16px;
+    overflow: hidden;
+  }
+
+  .model-card.visible { display: block; }
+
+  .model-card-header {
+    background: #1a472a;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .model-card-header h3 {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--green-bright);
+  }
+
+  .model-number {
+    padding: 16px;
+    text-align: center;
+  }
+
+  .model-number .detected {
+    font-size: 26px;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: 1px;
+    word-break: break-all;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 8px;
+    transition: background 0.2s;
+  }
+
+  .model-number .detected:active {
+    background: #30363d;
+  }
+
+  .model-number .tap-hint {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 6px;
+  }
+
+  .model-number input {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px;
+    font-size: 18px;
+    font-weight: 700;
+    color: #fff;
+    text-align: center;
+    margin-top: 8px;
+    outline: none;
+  }
+
+  .model-number input:focus { border-color: var(--green); }
+
+  /* ===== Search Buttons ===== */
+  .search-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    padding: 0 16px 16px;
+  }
+
+  .search-btn {
+    padding: 12px 10px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--text);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: all 0.15s;
+    -webkit-tap-highlight-color: transparent;
+    text-decoration: none;
+  }
+
+  .search-btn:active { transform: scale(0.96); }
+
+  .search-btn.mercari { border-color: #e04040; color: #ff6060; }
+  .search-btn.yahoo { border-color: #ff6633; color: #ff8855; }
+  .search-btn.rakuten { border-color: #bf0000; color: #ff4444; }
+  .search-btn.amazon { border-color: #ff9900; color: #ffaa33; }
+  .search-btn.google { border-color: var(--blue); color: var(--blue); }
+  .search-btn.golfdo { border-color: var(--green); color: var(--green-bright); }
+
+  /* ===== Full OCR Text ===== */
+  .raw-text-section {
+    display: none;
+    margin-top: 16px;
+  }
+
+  .raw-text-section.visible { display: block; }
+
+  .raw-text-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .raw-text-toggle span {
+    font-size: 13px;
+    color: var(--text-muted);
+    font-weight: 500;
+  }
+
+  .raw-text-toggle .arrow {
+    transition: transform 0.2s;
+    color: var(--text-muted);
+  }
+
+  .raw-text-toggle.open .arrow { transform: rotate(180deg); }
+
+  .raw-text-box {
+    display: none;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-top: none;
+    border-radius: 0 0 10px 10px;
+    padding: 14px;
+    font-size: 13px;
+    line-height: 1.7;
+    white-space: pre-wrap;
+    word-break: break-all;
+    color: var(--text-muted);
+    max-height: 250px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .raw-text-box.open { display: block; }
+
+  .confidence-badge {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  .conf-high { background: #1a472a; color: var(--green-bright); }
+  .conf-mid { background: #3d2e00; color: var(--orange); }
+  .conf-low { background: #3d1010; color: var(--red); }
+
+  /* ===== History Tab ===== */
+  .history-empty {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-muted);
+  }
+
+  .history-empty .icon { font-size: 40px; margin-bottom: 12px; }
+
+  .history-list { display: flex; flex-direction: column; gap: 8px; }
+
+  .history-item {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    cursor: pointer;
+    transition: border-color 0.2s;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .history-item:active { border-color: var(--green); }
+
+  .history-item .thumb {
+    width: 50px;
+    height: 50px;
+    border-radius: 8px;
+    object-fit: cover;
+    background: var(--bg);
+    flex-shrink: 0;
+  }
+
+  .history-item .info { flex: 1; min-width: 0; }
+
+  .history-item .model-name {
+    font-size: 15px;
+    font-weight: 700;
+    color: #fff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .history-item .timestamp {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+
+  .history-item .search-icon {
+    color: var(--text-muted);
+    font-size: 18px;
+  }
+
+  .history-clear {
+    display: block;
+    margin: 16px auto 0;
+    padding: 10px 20px;
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text-muted);
+    font-size: 13px;
+    cursor: pointer;
+  }
+
+  /* ===== Tips ===== */
+  .tips {
+    margin-top: 20px;
+    padding: 14px;
+    background: var(--card);
+    border-radius: 12px;
+    border: 1px solid var(--border);
+  }
+
+  .tips h3 {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+  }
+
+  .tips ul { list-style: none; }
+
+  .tips li {
+    font-size: 12px;
+    color: #484f58;
+    padding: 2px 0;
+    line-height: 1.5;
+  }
+
+  .tips li::before { content: 'â¢ '; color: var(--green); }
+
+  /* ===== Bottom Nav ===== */
+  .bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 480px;
+    background: var(--card);
+    border-top: 1px solid var(--border);
+    display: flex;
+    padding: 8px 0 max(8px, env(safe-area-inset-bottom));
+    z-index: 100;
+  }
+
+  .nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    padding: 6px 0;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    color: var(--text-muted);
+    font-size: 10px;
+    font-weight: 500;
+    transition: color 0.2s;
+  }
+
+  .nav-item.active { color: var(--green-bright); }
+  .nav-item .nav-icon { font-size: 22px; }
+
+  /* ===== Utility ===== */
+  input[type="file"] { display: none; }
+
+  .spinner {
+    display: inline-block;
+    width: 16px; height: 16px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .fade-in {
+    animation: fadeIn 0.3s ease;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
 </style>
 </head>
 <body>
-<div id="root"></div>
-<script type="text/babel">
-const { useState, useRef, useCallback } = React;
 
-// ─── 定数 ───
-const MERCARI_FEE = 0.1;
-const YAHOO_FEE = 0.05;
-const SHIPPING = [
-  { label: "ネコポス", value: 210 },
-  { label: "ゆうパケット", value: 230 },
-  { label: "宅急便60", value: 750 },
-  { label: "宅急便80", value: 850 },
-  { label: "宅急便100", value: 1050 },
-  { label: "ゆうパック80", value: 1100 },
-  { label: "カスタム", value: 0 },
+<!-- ===== Header ===== -->
+<div class="app-header">
+  <div class="logo">
+    <div class="logo-icon">â³</div>
+    <div>
+      <h1>Golf Sedori OCR</h1>
+      <div class="subtitle">åçªã¹ã­ã£ãã¼</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Pages ===== -->
+
+<!-- Scan Page -->
+<div class="page active" id="pageScan">
+
+  <div class="capture-area" id="captureArea">
+    <div class="placeholder" id="placeholder">
+      <div class="icon">ðï¸</div>
+      <p>ã¯ã©ãã®éæ¿ã»ã·ã£ããã®<br>åçªé¨åãæ®å½±ãã¦ãã ãã</p>
+      <div class="hint">ã¢ãã«åã»ã­ããè§ã»ã·ã£ããæå ±ãèªåæ½åº</div>
+    </div>
+    <img id="preview" style="display:none" alt="ãã¬ãã¥ã¼">
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-camera" onclick="openCamera()">ð· æ®å½±</button>
+    <button class="btn btn-gallery" onclick="openGallery()">ð¼ é¸æ</button>
+  </div>
+
+  <button class="btn-scan" id="scanBtn" onclick="startOCR()">
+    ð åçªãèª­ã¿åã
+  </button>
+
+  <div class="progress-container" id="progressContainer">
+    <div class="progress-bar-bg">
+      <div class="progress-bar" id="progressBar"></div>
+    </div>
+    <div class="progress-label" id="progressLabel">æºåä¸­...</div>
+  </div>
+
+  <!-- Model Number Result Card -->
+  <div class="model-card" id="modelCard">
+    <div class="model-card-header">
+      <h3>â³ æ¤åºãããåçª</h3>
+      <span id="confBadge" class="confidence-badge"></span>
+    </div>
+    <div class="model-number">
+      <div class="detected" id="detectedModel" onclick="copyModel()"></div>
+      <div class="tap-hint">ã¿ããã§ã³ãã¼</div>
+      <input type="text" id="modelInput" placeholder="åçªãä¿®æ­£ã»å¥å">
+    </div>
+    <div class="search-grid">
+      <a class="search-btn mercari" id="linkMercari" target="_blank">ð´ ã¡ã«ã«ãª</a>
+      <a class="search-btn yahoo" id="linkYahoo" target="_blank">ð  ã¤ããªã¯</a>
+      <a class="search-btn rakuten" id="linkRakuten" target="_blank">ð´ æ¥½å¤©</a>
+      <a class="search-btn amazon" id="linkAmazon" target="_blank">ð¡ Amazon</a>
+      <a class="search-btn golfdo" id="linkGolfdo" target="_blank">â³ ã´ã«ããã¥</a>
+      <a class="search-btn google" id="linkGoogle" target="_blank">ðµ Google</a>
+    </div>
+  </div>
+
+  <!-- Raw OCR Text -->
+  <div class="raw-text-section" id="rawTextSection">
+    <div class="raw-text-toggle" id="rawToggle" onclick="toggleRawText()">
+      <span>å¨æãã­ã¹ããè¡¨ç¤º</span>
+      <span class="arrow">â¼</span>
+    </div>
+    <div class="raw-text-box" id="rawTextBox"></div>
+  </div>
+
+  <div class="tips" id="tips">
+    <h3>èª­ã¿åãã®ã³ã</h3>
+    <ul>
+      <li>ã·ã£ããã®å°å­ãã½ã¼ã«é¨åã®å»å°ãçã</li>
+      <li>éæ¿ãæ°´å¹³ã«ãªãããè§åº¦ãèª¿æ´</li>
+      <li>æããå ´æã§å½±ãå¥ããªãããã«æ®å½±</li>
+      <li>èª­ã¿åãå¾ãåçªã¯æåã§ä¿®æ­£å¯è½</li>
+    </ul>
+  </div>
+
+</div>
+
+<!-- History Page -->
+<div class="page" id="pageHistory">
+  <div class="history-empty" id="historyEmpty">
+    <div class="icon">ð</div>
+    <p>ã¾ã èª­ã¿åãå±¥æ­´ãããã¾ãã</p>
+  </div>
+  <div class="history-list" id="historyList"></div>
+  <button class="history-clear" id="historyClearBtn" onclick="clearHistory()" style="display:none">å±¥æ­´ãã¯ãªã¢</button>
+</div>
+
+<!-- Bottom Navigation -->
+<div class="bottom-nav">
+  <div class="nav-item active" onclick="switchPage('scan')" id="navScan">
+    <span class="nav-icon">ð·</span>
+    ã¹ã­ã£ã³
+  </div>
+  <div class="nav-item" onclick="switchPage('history')" id="navHistory">
+    <span class="nav-icon">ð</span>
+    å±¥æ­´
+  </div>
+</div>
+
+<!-- Hidden Inputs -->
+<input type="file" id="cameraInput" accept="image/*" capture="environment">
+<input type="file" id="galleryInput" accept="image/*">
+
+<script>
+// ===== Elements =====
+const cameraInput = document.getElementById('cameraInput');
+const galleryInput = document.getElementById('galleryInput');
+const preview = document.getElementById('preview');
+const placeholder = document.getElementById('placeholder');
+const captureArea = document.getElementById('captureArea');
+const scanBtn = document.getElementById('scanBtn');
+const progressContainer = document.getElementById('progressContainer');
+const progressBar = document.getElementById('progressBar');
+const progressLabel = document.getElementById('progressLabel');
+const modelCard = document.getElementById('modelCard');
+const detectedModel = document.getElementById('detectedModel');
+const modelInput = document.getElementById('modelInput');
+const confBadge = document.getElementById('confBadge');
+const rawTextSection = document.getElementById('rawTextSection');
+const rawToggle = document.getElementById('rawToggle');
+const rawTextBox = document.getElementById('rawTextBox');
+const tips = document.getElementById('tips');
+
+let currentImageData = null;
+let scanHistory = [];
+
+// ===== Golf Brand & Model Patterns =====
+const golfBrands = [
+  'TITLEIST', 'CALLAWAY', 'TAYLORMADE', 'TAYLOR MADE', 'PING', 'MIZUNO',
+  'BRIDGESTONE', 'DUNLOP', 'XXIO', 'SRIXON', 'CLEVELAND', 'COBRA',
+  'ODYSSEY', 'SCOTTY CAMERON', 'HONMA', 'YAMAHA', 'PRGR', 'FOURTEEN',
+  'ONOFF', 'DAIWA', 'GLOBERIDE', 'KATANA', 'MARUMAN', 'RYOMA',
+  'BALDO', 'EPON', 'MIURA', 'JUSTICK', 'NEXGEN', 'YONEX',
+  'TOURSTAGE', 'MACGREGOR', 'ADAMS', 'WILSON', 'NIKE',
+  'ãã¼ã©ã¼ã¡ã¤ã', 'ã­ã£ã­ã¦ã§ã¤', 'ã¿ã¤ããªã¹ã', 'ãã³', 'ããºã',
+  'ããªãã¹ãã³', 'ãã³ã­ãã', 'ã¼ã¯ã·ãª', 'ã¹ãªã¯ã½ã³', 'ãã³ã',
+  'ã¤ãã', 'ãªããã»ã¤', 'ã³ãã©', 'ã¯ãªã¼ãã©ã³ã', 'ãã©ã¼ãã£ã¼ã³',
+  'ãªãã', 'ã«ã¿ã', 'ãã«ãã³', 'ãªã§ã¼ã', 'ã¨ããã¯ã¹'
 ];
-const CATEGORIES = ["パター","ドライバー","FW","UT","アイアン","ウェッジ","シューズ","バッグ","距離計","その他"];
-const CONDITIONS = ["N","A","B","C","D","E"];
 
-// ─── SVG Icons ───
-const Icon = ({ d, size=18 }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d={d}/>
-  </svg>
-);
-const CameraIcon = () => <Icon d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2zM12 17a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/>;
-const CalcIcon = () => <Icon d="M4 2h16a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2zM8 6v4M6 8h4M6 18h4M14 6h4M15.5 14l3 3M18.5 14l-3 3"/>;
-const HistoryIcon = () => <Icon d="M12 8v4l3 3M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8M3 3v5h5"/>;
-const ExtIcon = ({size=14}) => <Icon d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3" size={size}/>;
-const TrashIcon = () => <Icon d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" size={14}/>;
-const SearchIcon = () => <Icon d="M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16zM21 21l-4.35-4.35"/>;
+const shaftBrands = [
+  'DYNAMIC GOLD', 'NS PRO', 'MODUS', 'PROJECT X', 'KBS', 'TRUE TEMPER',
+  'GRAPHITE DESIGN', 'FUJIKURA', 'MITSUBISHI', 'DIAMANA', 'SPEEDER',
+  'TOUR AD', 'VENTUS', 'TENSEI', 'ATTAS', 'SHAFT',
+  'ãã¤ãããã¯ã´ã¼ã«ã', 'ã¢ã¼ãã¹', 'ãã£ã¢ãã', 'ã¹ãã¼ãã¼', 'ãã¢ã¼AD'
+];
 
-// ─── 利益計算 ───
-function calcProfit(sellPrice, fee, shippingCost, costPrice) {
-  const sell = parseInt(sellPrice) || 0;
-  const gp = parseInt(costPrice) || 0;
-  const commission = Math.floor(sell * fee);
-  const profit = sell - commission - shippingCost - gp;
-  const rate = gp > 0 ? (profit / gp * 100) : 0;
-  return { sell, commission, profit, rate };
+// Known model patterns (common golf club model names/numbers)
+const modelPatterns = [
+  // Alphanumeric model patterns
+  /\b[A-Z]{2,}[\s-]?\d{2,4}[A-Z]?\b/g,           // e.g., SIM2, TSR3, G430
+  /\b\d{3,4}[\s-]?[A-Z]{1,3}\b/g,                  // e.g., 913D, 620MB
+  /\b[A-Z]+[\s-]\d+[\s-][A-Z]+\b/g,                // e.g., ROGUE ST MAX
+  /\b(?:PRO|MAX|MINI|PLUS|LS|ST|Ti|SE|LTD)\b/gi,  // Common suffixes
+  /\d{1,2}(?:\.\d)?Â°/g,                             // Loft angles: 10.5Â°, 9Â°
+  /\b[SRX]{1}[\s-]?(?:FLEX|flex)\b/g,              // Flex info
+  /\b(?:S|SR|R|A|L|X|XX)[\s-](?:ã·ã£ãã|shaft)\b/gi,
+];
+
+function extractModelInfo(text) {
+  const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+  const upperText = text.toUpperCase();
+
+  let foundBrand = '';
+  let foundModels = [];
+  let foundShaft = '';
+
+  // 1. Find brand
+  for (const brand of golfBrands) {
+    if (upperText.includes(brand.toUpperCase())) {
+      foundBrand = brand;
+      break;
+    }
+  }
+
+  // 2. Find shaft
+  for (const shaft of shaftBrands) {
+    if (upperText.includes(shaft.toUpperCase())) {
+      foundShaft = shaft;
+      break;
+    }
+  }
+
+  // 3. Extract model-like strings from each line
+  for (const line of lines) {
+    // Skip very short or very long lines
+    if (line.length < 2 || line.length > 60) continue;
+
+    // Check if line looks like a model identifier
+    const hasNumbers = /\d/.test(line);
+    const hasLetters = /[A-Za-z]/.test(line);
+    const lineUpper = line.toUpperCase();
+
+    // Check against model patterns
+    for (const pat of modelPatterns) {
+      pat.lastIndex = 0;
+      const matches = line.match(pat);
+      if (matches) {
+        foundModels.push(...matches);
+      }
+    }
+
+    // Lines that contain brand + something else are likely model identifiers
+    if (foundBrand && lineUpper.includes(foundBrand.toUpperCase()) && line.length > foundBrand.length + 2) {
+      const modelPart = line.replace(new RegExp(foundBrand, 'gi'), '').trim();
+      if (modelPart.length >= 2 && modelPart.length <= 30) {
+        foundModels.unshift(modelPart);
+      }
+    }
+
+    // Lines with alphanumeric mix that look like product codes
+    if (hasNumbers && hasLetters && line.length >= 3 && line.length <= 25) {
+      if (/^[A-Za-z0-9\s\-\.Â°]+$/.test(line)) {
+        foundModels.push(line);
+      }
+    }
+  }
+
+  // Deduplicate
+  foundModels = [...new Set(foundModels)].slice(0, 5);
+
+  // Build display string
+  let result = '';
+  if (foundBrand) result += foundBrand;
+  if (foundModels.length > 0) {
+    const mainModel = foundModels[0];
+    if (result && !mainModel.toUpperCase().includes(foundBrand.toUpperCase())) {
+      result += ' ' + mainModel;
+    } else if (!result) {
+      result = mainModel;
+    }
+  }
+  if (foundShaft && !result.toUpperCase().includes(foundShaft.toUpperCase())) {
+    result += ' / ' + foundShaft;
+  }
+
+  // Fallback: use the most model-like line
+  if (!result) {
+    const candidateLines = lines.filter(l =>
+      l.length >= 3 && l.length <= 40 &&
+      /[A-Za-z0-9]/.test(l) &&
+      !/^[\s\p{P}]+$/u.test(l)
+    );
+    if (candidateLines.length > 0) {
+      result = candidateLines[0];
+    }
+  }
+
+  return result || text.substring(0, 30);
 }
 
-// ─── Badge ───
-function ProfitBadge({ profit }) {
-  if (!profit && profit !== 0) return null;
-  const cls = profit > 0 ? "badge badge-green" : profit < 0 ? "badge badge-red" : "badge";
-  const txt = profit > 0 ? `+¥${profit.toLocaleString()}` : profit < 0 ? `¥${profit.toLocaleString()}` : "±0";
-  return <span className={cls}>{txt}</span>;
+// ===== Search URLs =====
+function updateSearchLinks(query) {
+  const q = encodeURIComponent('ã´ã«ã ' + query);
+  const qPlain = encodeURIComponent(query);
+  document.getElementById('linkMercari').href = `https://www.mercari.com/jp/search/?keyword=${q}&category_root=780`;
+  document.getElementById('linkYahoo').href = `https://auctions.yahoo.co.jp/search/search?p=${q}&auccat=25458`;
+  document.getElementById('linkRakuten').href = `https://search.rakuten.co.jp/search/mall/${q}/101164/`;
+  document.getElementById('linkAmazon').href = `https://www.amazon.co.jp/s?k=${q}&i=sporting`;
+  document.getElementById('linkGolfdo').href = `https://www.golfdo.com/cgi-bin/search/item_list.cgi?k=${qPlain}`;
+  document.getElementById('linkGoogle').href = `https://www.google.com/search?q=${q}+ä¸­å¤+ç¸å ´`;
 }
 
-// ─── Main App ───
-function App() {
-  const [screen, setScreen] = useState("scan");
-  const [photo, setPhoto] = useState(null);
-  const [productName, setProductName] = useState("");
-  const [category, setCategory] = useState("パター");
-  const [gpPrice, setGpPrice] = useState("");
-  const [condition, setCondition] = useState("C");
-  const [shipIdx, setShipIdx] = useState(3);
-  const [customShip, setCustomShip] = useState("");
-  const [mercariPrice, setMercariPrice] = useState("");
-  const [yahooPrice, setYahooPrice] = useState("");
-  const [history, setHistory] = useState([]);
-  const fileRef = useRef(null);
+// ===== Navigation =====
+function switchPage(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
 
-  const ship = SHIPPING[shipIdx].label === "カスタム" ? (parseInt(customShip)||0) : SHIPPING[shipIdx].value;
-  const mc = calcProfit(mercariPrice, MERCARI_FEE, ship, gpPrice);
-  const yc = calcProfit(yahooPrice, YAHOO_FEE, ship, gpPrice);
-  const mercariUrl = productName ? `https://jp.mercari.com/search?keyword=${encodeURIComponent(productName)}&status=sold_out` : "";
-  const yahooUrl = productName ? `https://paypayfleamarket.yahoo.co.jp/search/${encodeURIComponent(productName)}?sold=1` : "";
+  if (page === 'scan') {
+    document.getElementById('pageScan').classList.add('active');
+    document.getElementById('navScan').classList.add('active');
+  } else {
+    document.getElementById('pageHistory').classList.add('active');
+    document.getElementById('navHistory').classList.add('active');
+    renderHistory();
+  }
+}
 
-  const handlePhoto = (e) => {
-    const f = e.target.files?.[0];
-    if (f) { const r = new FileReader(); r.onload = (ev) => setPhoto(ev.target.result); r.readAsDataURL(f); }
+// ===== Camera / Gallery =====
+function openCamera() { cameraInput.click(); }
+function openGallery() { galleryInput.click(); }
+
+function handleImage(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    currentImageData = ev.target.result;
+    preview.src = currentImageData;
+    preview.style.display = 'block';
+    placeholder.style.display = 'none';
+    captureArea.classList.add('has-image');
+    scanBtn.classList.add('visible');
+    modelCard.classList.remove('visible');
+    rawTextSection.classList.remove('visible');
+    tips.style.display = 'none';
   };
-
-  const saveResult = () => {
-    if (!productName || !gpPrice) return;
-    setHistory(prev => [{ id: Date.now(), date: new Date().toLocaleString("ja-JP"), productName, category, condition, gpPrice: parseInt(gpPrice)||0, mercariPrice: parseInt(mercariPrice)||0, yahooPrice: parseInt(yahooPrice)||0, mercariProfit: mc.profit, yahooProfit: yc.profit, ship, photo }, ...prev].slice(0, 50));
-    resetForm(); setScreen("history");
-  };
-
-  const resetForm = () => { setPhoto(null); setProductName(""); setGpPrice(""); setMercariPrice(""); setYahooPrice(""); };
-
-  // ─── TAB ICONS ───
-  const tabs = [
-    { id:"scan", icon:<CameraIcon/>, label:"撮影・入力" },
-    { id:"calc", icon:<CalcIcon/>, label:"利益計算" },
-    { id:"history", icon:<HistoryIcon/>, label:"履歴" },
-  ];
-
-  return (
-    <>
-      {/* Header */}
-      <div className="header">
-        <div className="header-icon">⛳</div>
-        <div><h1>ゴルフせどりチェッカー</h1><p>GP仕入れ → メルカリ / Yahoo転売</p></div>
-      </div>
-
-      {/* Tab Nav */}
-      <nav className="tab-nav">
-        {tabs.map(t => (
-          <button key={t.id} className={`tab-btn ${screen===t.id?"active":""}`} onClick={()=>setScreen(t.id)}>
-            {t.icon}<span>{t.label}</span>
-          </button>
-        ))}
-      </nav>
-
-      {/* Main */}
-      <div className="main">
-        <div className="space-y">
-
-        {/* ═══ SCAN SCREEN ═══ */}
-        {screen === "scan" && <>
-          {/* Photo */}
-          <div className="card">
-            <div className="card-header">📷 Step 1: 値札を撮影</div>
-            {photo ? (
-              <div style={{position:"relative"}}>
-                <img src={photo} alt="値札" className="photo-preview"/>
-                <button className="photo-close" onClick={()=>setPhoto(null)}>✕</button>
-              </div>
-            ) : (
-              <div className="photo-area">
-                <div className="photo-circle">📷</div>
-                <p className="text-sm text-gray" style={{textAlign:"center"}}>GP店舗の値札を撮影してください</p>
-                <div className="flex gap-2">
-                  <button className="btn-primary" style={{width:"auto",padding:"10px 20px",fontSize:13}} onClick={()=>{fileRef.current.setAttribute('capture','environment');fileRef.current.click()}}>
-                    📷 撮影する
-                  </button>
-                  <button className="btn-outline" style={{padding:"10px 20px",fontSize:13}} onClick={()=>{fileRef.current.removeAttribute('capture');fileRef.current.click()}}>
-                    🖼 画像選択
-                  </button>
-                </div>
-                <input ref={fileRef} type="file" accept="image/*" onChange={handlePhoto} className="hidden"/>
-              </div>
-            )}
-          </div>
-
-          {/* Product Info */}
-          <div className="card">
-            <div className="card-header">🔍 Step 2: 商品情報を入力</div>
-            <div className="card-body space-y">
-              <div>
-                <label className="form-label">商品名（検索キーワード）</label>
-                <input type="text" className="form-input" value={productName} onChange={e=>setProductName(e.target.value)} placeholder="例: スコッティキャメロン Super Select Newport 2"/>
-              </div>
-              <div className="flex gap-2">
-                <div className="flex-1">
-                  <label className="form-label">カテゴリ</label>
-                  <select className="form-select" value={category} onChange={e=>setCategory(e.target.value)}>
-                    {CATEGORIES.map(c=><option key={c}>{c}</option>)}
-                  </select>
-                </div>
-                <div style={{width:80}}>
-                  <label className="form-label">状態</label>
-                  <select className="form-select" value={condition} onChange={e=>setCondition(e.target.value)}>
-                    {CONDITIONS.map(c=><option key={c}>{c}</option>)}
-                  </select>
-                </div>
-              </div>
-              <div>
-                <label className="form-label">GP仕入れ価格（税込）</label>
-                <div className="price-input-wrap">
-                  <span className="yen">¥</span>
-                  <input type="number" className="form-input" value={gpPrice} onChange={e=>setGpPrice(e.target.value)} placeholder="0" inputMode="numeric"/>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Search Links */}
-          <div className="card">
-            <div className="card-header">🔗 Step 3: 売却相場を調べる</div>
-            <div className="card-body space-y">
-              {!productName ? (
-                <p className="text-xs text-gray text-center" style={{padding:"8px 0"}}>商品名を入力すると検索できます</p>
-              ) : (<>
-                <a href={mercariUrl} target="_blank" rel="noopener" className="search-link search-link-mercari">
-                  <div className="flex gap-2" style={{alignItems:"center"}}>
-                    <div className="search-link-icon" style={{background:"#ef4444"}}>M</div>
-                    <div><div className="text-sm font-bold">メルカリで検索</div><div className="text-xs" style={{color:"#f87171"}}>売却済み商品を表示</div></div>
-                  </div>
-                  <ExtIcon/>
-                </a>
-                <a href={yahooUrl} target="_blank" rel="noopener" className="search-link search-link-yahoo">
-                  <div className="flex gap-2" style={{alignItems:"center"}}>
-                    <div className="search-link-icon" style={{background:"#eab308"}}>Y</div>
-                    <div><div className="text-sm font-bold">Yahoo!フリマで検索</div><div className="text-xs" style={{color:"#ca8a04"}}>売却済み商品を表示</div></div>
-                  </div>
-                  <ExtIcon/>
-                </a>
-                <p className="text-xs text-gray text-center">相場を確認したら「利益計算」タブで価格を入力</p>
-              </>)}
-            </div>
-          </div>
-
-          {productName && gpPrice && (
-            <button className="btn-primary" onClick={()=>setScreen("calc")}>利益計算に進む →</button>
-          )}
-        </>}
-
-        {/* ═══ CALC SCREEN ═══ */}
-        {screen === "calc" && <>
-          {/* Summary */}
-          <div className="card">
-            <div className="card-body">
-              <div className="flex gap-3">
-                {photo && <img src={photo} alt="" className="history-thumb"/>}
-                <div style={{minWidth:0,flex:1}}>
-                  <div className="text-sm font-bold truncate">{productName || "（商品名未入力）"}</div>
-                  <div className="flex gap-2 mt-2">
-                    <span className="tag">{category}</span><span className="tag">状態{condition}</span>
-                  </div>
-                  <div className="font-bold mt-2" style={{fontSize:17,color:"#059669"}}>GP仕入: ¥{(parseInt(gpPrice)||0).toLocaleString()}</div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Shipping */}
-          <div className="card">
-            <div className="card-header" style={{fontSize:12}}>📦 送料設定</div>
-            <div className="card-body">
-              <div className="ship-chips">
-                {SHIPPING.map((s,i) => (
-                  <button key={s.label} className={`ship-chip ${shipIdx===i?"active":""}`} onClick={()=>setShipIdx(i)}>
-                    {s.label}{s.value>0?` ¥${s.value}`:""}
-                  </button>
-                ))}
-              </div>
-              {SHIPPING[shipIdx].label==="カスタム" && (
-                <input type="number" className="form-input mt-2" value={customShip} onChange={e=>setCustomShip(e.target.value)} placeholder="送料を入力" inputMode="numeric"/>
-              )}
-            </div>
-          </div>
-
-          {/* Mercari Calc */}
-          <div className="card">
-            <div className="card-header" style={{background:"#fef2f2"}}>
-              <div className="search-link-icon" style={{background:"#ef4444",width:24,height:24,fontSize:11}}>M</div>
-              <span style={{color:"#b91c1c",flex:1}}>メルカリ <span className="text-xs" style={{fontWeight:400}}>手数料10%</span></span>
-              {mercariPrice && <ProfitBadge profit={mc.profit}/>}
-            </div>
-            <div className="card-body space-y">
-              <div>
-                <label className="form-label">想定売却価格</label>
-                <div className="price-input-wrap">
-                  <span className="yen">¥</span>
-                  <input type="number" className="form-input" value={mercariPrice} onChange={e=>setMercariPrice(e.target.value)} placeholder="メルカリの相場価格を入力" inputMode="numeric"/>
-                </div>
-              </div>
-              {mercariPrice && (
-                <div className="profit-breakdown">
-                  <div className="profit-row"><span className="text-gray">売却価格</span><span>¥{mc.sell.toLocaleString()}</span></div>
-                  <div className="profit-row"><span className="text-gray">手数料 (10%)</span><span className="text-red">-¥{mc.commission.toLocaleString()}</span></div>
-                  <div className="profit-row"><span className="text-gray">送料</span><span className="text-red">-¥{ship.toLocaleString()}</span></div>
-                  <div className="profit-row"><span className="text-gray">仕入原価</span><span className="text-red">-¥{(parseInt(gpPrice)||0).toLocaleString()}</span></div>
-                  <div className="profit-row profit-total">
-                    <span>利益</span>
-                    <span className={mc.profit>=0?"text-green":"text-red"}>¥{mc.profit.toLocaleString()} ({mc.rate.toFixed(1)}%)</span>
-                  </div>
-                </div>
-              )}
-              {productName && <a href={mercariUrl} target="_blank" rel="noopener" className="btn-link-small" style={{color:"#ef4444"}}>🔗 メルカリで相場を確認</a>}
-            </div>
-          </div>
-
-          {/* Yahoo Calc */}
-          <div className="card">
-            <div className="card-header" style={{background:"#fefce8"}}>
-              <div className="search-link-icon" style={{background:"#eab308",width:24,height:24,fontSize:11}}>Y</div>
-              <span style={{color:"#92400e",flex:1}}>Yahoo!フリマ <span className="text-xs" style={{fontWeight:400}}>手数料5%</span></span>
-              {yahooPrice && <ProfitBadge profit={yc.profit}/>}
-            </div>
-            <div className="card-body space-y">
-              <div>
-                <label className="form-label">想定売却価格</label>
-                <div className="price-input-wrap">
-                  <span className="yen">¥</span>
-                  <input type="number" className="form-input" value={yahooPrice} onChange={e=>setYahooPrice(e.target.value)} placeholder="Yahoo!フリマの相場価格を入力" inputMode="numeric"/>
-                </div>
-              </div>
-              {yahooPrice && (
-                <div className="profit-breakdown">
-                  <div className="profit-row"><span className="text-gray">売却価格</span><span>¥{yc.sell.toLocaleString()}</span></div>
-                  <div className="profit-row"><span className="text-gray">手数料 (5%)</span><span className="text-red">-¥{yc.commission.toLocaleString()}</span></div>
-                  <div className="profit-row"><span className="text-gray">送料</span><span className="text-red">-¥{ship.toLocaleString()}</span></div>
-                  <div className="profit-row"><span className="text-gray">仕入原価</span><span className="text-red">-¥{(parseInt(gpPrice)||0).toLocaleString()}</span></div>
-                  <div className="profit-row profit-total">
-                    <span>利益</span>
-                    <span className={yc.profit>=0?"text-green":"text-red"}>¥{yc.profit.toLocaleString()} ({yc.rate.toFixed(1)}%)</span>
-                  </div>
-                </div>
-              )}
-              {productName && <a href={yahooUrl} target="_blank" rel="noopener" className="btn-link-small" style={{color:"#ca8a04"}}>🔗 Yahoo!フリマで相場を確認</a>}
-            </div>
-          </div>
-
-          {/* Verdict */}
-          {(mercariPrice || yahooPrice) && (() => {
-            const best = Math.max(mc.profit, yc.profit);
-            const where = mc.profit >= yc.profit ? "メルカリ" : "Yahoo!フリマ";
-            return (
-              <div className={`verdict ${best>0?"verdict-ok":"verdict-ng"}`}>
-                <h2>{best > 0 ? "🟢 仕入れOK" : "🔴 見送り推奨"}</h2>
-                <p>{best > 0 ? `最大利益 ¥${best.toLocaleString()} (${where})` : "現在の価格では利益が出ません"}</p>
-              </div>
-            );
-          })()}
-
-          <div className="btn-row">
-            <button className="btn-outline" onClick={()=>setScreen("scan")}>← 入力に戻る</button>
-            <button className="btn-primary" onClick={saveResult} disabled={!productName||!gpPrice}>履歴に保存</button>
-          </div>
-        </>}
-
-        {/* ═══ HISTORY SCREEN ═══ */}
-        {screen === "history" && <>
-          <div className="flex" style={{justifyContent:"space-between",alignItems:"center"}}>
-            <span className="text-sm font-bold" style={{color:"#4b5563"}}>チェック履歴 ({history.length}件)</span>
-            {history.length > 0 && (
-              <button onClick={()=>setHistory([])} style={{border:"none",background:"none",color:"#f87171",fontSize:12,cursor:"pointer",display:"flex",alignItems:"center",gap:4}}>
-                <TrashIcon/> 全削除
-              </button>
-            )}
-          </div>
-
-          {history.length === 0 ? (
-            <div className="card" style={{padding:"32px 16px",textAlign:"center"}}>
-              <div style={{fontSize:32,color:"#d1d5db",marginBottom:8}}>📋</div>
-              <p className="text-sm text-gray">まだ履歴がありません</p>
-              <p className="text-xs text-gray mt-2">商品をチェックすると、ここに保存されます</p>
-            </div>
-          ) : (<>
-            {history.map(item => {
-              const bestProfit = Math.max(item.mercariProfit, item.yahooProfit);
-              return (
-                <div key={item.id} className="history-item">
-                  <div className="history-top">
-                    {item.photo && <img src={item.photo} alt="" className="history-thumb"/>}
-                    <div style={{minWidth:0,flex:1}}>
-                      <div className="text-sm font-bold truncate">{item.productName}</div>
-                      <div className="flex gap-2" style={{marginTop:3}}><span className="tag">{item.category}</span><span className="tag">状態{item.condition}</span></div>
-                      <div className="text-xs text-gray" style={{marginTop:3}}>{item.date}</div>
-                    </div>
-                  </div>
-                  <div className="history-stats">
-                    <div className="history-stat" style={{background:"#f9fafb"}}>
-                      <div className="text-xs text-gray">GP仕入</div>
-                      <div className="text-sm font-bold">¥{item.gpPrice.toLocaleString()}</div>
-                    </div>
-                    <div className="history-stat" style={{background:item.mercariProfit>=0?"#f0fdf4":"#fef2f2"}}>
-                      <div className="text-xs text-gray">メルカリ</div>
-                      <div className={`text-sm font-bold ${item.mercariProfit>=0?"text-green":"text-red"}`}>
-                        {item.mercariPrice > 0 ? `¥${item.mercariProfit.toLocaleString()}` : "-"}
-                      </div>
-                    </div>
-                    <div className="history-stat" style={{background:item.yahooProfit>=0?"#f0fdf4":"#fef2f2"}}>
-                      <div className="text-xs text-gray">Yahoo</div>
-                      <div className={`text-sm font-bold ${item.yahooProfit>=0?"text-green":"text-red"}`}>
-                        {item.yahooPrice > 0 ? `¥${item.yahooProfit.toLocaleString()}` : "-"}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-
-            {/* Summary */}
-            <div className="card" style={{background:"#ecfdf5",borderColor:"#a7f3d0"}}>
-              <div className="card-body">
-                <div className="text-sm font-bold" style={{color:"#059669",marginBottom:10}}>今日のまとめ</div>
-                <div className="summary-grid">
-                  <div><p>チェック数</p><p style={{color:"#059669"}}>{history.length}</p></div>
-                  <div><p>利益あり</p><p className="text-green">{history.filter(h=>Math.max(h.mercariProfit,h.yahooProfit)>0).length}</p></div>
-                  <div><p>最大利益</p><p className="text-green">¥{Math.max(0,...history.map(h=>Math.max(h.mercariProfit,h.yahooProfit))).toLocaleString()}</p></div>
-                </div>
-              </div>
-            </div>
-          </>)}
-        </>}
-
-        </div>
-      </div>
-    </>
-  );
+  reader.readAsDataURL(file);
+  // Reset input so same file can be re-selected
+  e.target.value = '';
 }
 
-ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+cameraInput.addEventListener('change', handleImage);
+galleryInput.addEventListener('change', handleImage);
+
+// ===== OCR =====
+async function startOCR() {
+  if (!currentImageData) return;
+
+  scanBtn.disabled = true;
+  scanBtn.innerHTML = '<span class="spinner"></span> èª­ã¿åãä¸­...';
+  progressContainer.classList.add('visible');
+  modelCard.classList.remove('visible');
+  rawTextSection.classList.remove('visible');
+  progressBar.style.width = '0%';
+  progressBar.style.background = 'linear-gradient(90deg, var(--green), var(--green-bright))';
+  progressLabel.textContent = 'æ¥æ¬èªãã¼ã¿ãèª­ã¿è¾¼ã¿ä¸­...';
+
+  try {
+    const result = await Tesseract.recognize(
+      currentImageData,
+      'jpn+eng',
+      {
+        logger: (m) => {
+          if (m.status === 'recognizing text') {
+            const pct = Math.round(m.progress * 100);
+            progressBar.style.width = pct + '%';
+            progressLabel.textContent = `ãã­ã¹ãèªè­ä¸­... ${pct}%`;
+          } else if (m.status === 'loading language traineddata') {
+            const pct = Math.round(m.progress * 100);
+            progressBar.style.width = (pct * 0.5) + '%';
+            progressLabel.textContent = `è¨èªãã¼ã¿èª­ã¿è¾¼ã¿ä¸­... ${pct}%`;
+          } else if (m.status === 'initializing api') {
+            progressLabel.textContent = 'OCRã¨ã³ã¸ã³åæåä¸­...';
+          }
+        }
+      }
+    );
+
+    const fullText = result.data.text.trim();
+    const conf = Math.round(result.data.confidence);
+
+    // Extract model info
+    const modelInfo = extractModelInfo(fullText);
+
+    // Display model card
+    detectedModel.textContent = modelInfo;
+    modelInput.value = modelInfo;
+    updateSearchLinks(modelInfo);
+
+    // Confidence badge
+    confBadge.textContent = `ç²¾åº¦ ${conf}%`;
+    if (conf >= 70) confBadge.className = 'confidence-badge conf-high';
+    else if (conf >= 40) confBadge.className = 'confidence-badge conf-mid';
+    else confBadge.className = 'confidence-badge conf-low';
+
+    modelCard.classList.add('visible');
+    modelCard.classList.add('fade-in');
+
+    // Raw text
+    rawTextBox.textContent = fullText;
+    rawTextSection.classList.add('visible');
+
+    progressContainer.classList.remove('visible');
+
+    // Save to history
+    addToHistory(modelInfo, currentImageData, conf);
+
+    // Scroll to result
+    setTimeout(() => {
+      modelCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100);
+
+  } catch (err) {
+    progressLabel.textContent = 'ã¨ã©ã¼: ' + err.message;
+    progressBar.style.width = '100%';
+    progressBar.style.background = 'var(--red)';
+    console.error('OCR Error:', err);
+  } finally {
+    scanBtn.disabled = false;
+    scanBtn.innerHTML = 'ð åçªãèª­ã¿åã';
+  }
+}
+
+// ===== Update search links when input changes =====
+modelInput.addEventListener('input', function() {
+  updateSearchLinks(this.value);
+  detectedModel.textContent = this.value;
+});
+
+// ===== Copy model =====
+function copyModel() {
+  const text = modelInput.value || detectedModel.textContent;
+  if (!text) return;
+
+  navigator.clipboard.writeText(text).then(() => {
+    const original = detectedModel.textContent;
+    detectedModel.textContent = 'ã³ãã¼ãã¾ãã â';
+    detectedModel.style.color = 'var(--green-bright)';
+    setTimeout(() => {
+      detectedModel.textContent = original;
+      detectedModel.style.color = '#fff';
+    }, 1200);
+  }).catch(() => {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+  });
+}
+
+// ===== Raw text toggle =====
+function toggleRawText() {
+  rawToggle.classList.toggle('open');
+  rawTextBox.classList.toggle('open');
+}
+
+// ===== History =====
+function addToHistory(model, imageData, confidence) {
+  // Store thumbnail (resize to save memory)
+  const thumbData = createThumbnail(imageData);
+
+  scanHistory.unshift({
+    model: model,
+    thumb: thumbData,
+    confidence: confidence,
+    timestamp: new Date().toLocaleString('ja-JP'),
+    date: Date.now()
+  });
+
+  // Keep max 50 items
+  if (scanHistory.length > 50) scanHistory.pop();
+}
+
+function createThumbnail(dataUrl) {
+  // For memory efficiency, just store the original (in real app, resize with canvas)
+  return dataUrl;
+}
+
+function renderHistory() {
+  const list = document.getElementById('historyList');
+  const empty = document.getElementById('historyEmpty');
+  const clearBtn = document.getElementById('historyClearBtn');
+
+  if (scanHistory.length === 0) {
+    empty.style.display = 'block';
+    list.innerHTML = '';
+    clearBtn.style.display = 'none';
+    return;
+  }
+
+  empty.style.display = 'none';
+  clearBtn.style.display = 'block';
+
+  list.innerHTML = scanHistory.map((item, i) => `
+    <div class="history-item" onclick="searchFromHistory(${i})">
+      <img class="thumb" src="${item.thumb}" alt="">
+      <div class="info">
+        <div class="model-name">${escapeHtml(item.model)}</div>
+        <div class="timestamp">${item.timestamp}</div>
+      </div>
+      <span class="search-icon">â</span>
+    </div>
+  `).join('');
+}
+
+function searchFromHistory(index) {
+  const item = scanHistory[index];
+  if (!item) return;
+
+  // Switch to scan page and populate
+  switchPage('scan');
+  detectedModel.textContent = item.model;
+  modelInput.value = item.model;
+  updateSearchLinks(item.model);
+  modelCard.classList.add('visible');
+  rawTextSection.classList.remove('visible');
+
+  if (item.thumb) {
+    preview.src = item.thumb;
+    preview.style.display = 'block';
+    placeholder.style.display = 'none';
+    captureArea.classList.add('has-image');
+  }
+
+  setTimeout(() => {
+    modelCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 100);
+}
+
+function clearHistory() {
+  if (confirm('èª­ã¿åãå±¥æ­´ããã¹ã¦åé¤ãã¾ããï¼')) {
+    scanHistory = [];
+    renderHistory();
+  }
+}
+
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
 </script>
 </body>
 </html>
