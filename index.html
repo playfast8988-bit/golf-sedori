@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>ã´ã«ããã©ã OCR</title>
+<title>ゴルフせどり OCR</title>
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -476,7 +476,7 @@
     line-height: 1.5;
   }
 
-  .tips li::before { content: 'â¢ '; color: var(--green); }
+  .tips li::before { content: '• '; color: var(--green); }
 
   /* ===== Bottom Nav ===== */
   .bottom-nav {
@@ -540,10 +540,10 @@
 <!-- ===== Header ===== -->
 <div class="app-header">
   <div class="logo">
-    <div class="logo-icon">â³</div>
+    <div class="logo-icon">⛳</div>
     <div>
       <h1>Golf Sedori OCR</h1>
-      <div class="subtitle">åçªã¹ã­ã£ãã¼</div>
+      <div class="subtitle">型番スキャナー</div>
     </div>
   </div>
 </div>
@@ -555,66 +555,66 @@
 
   <div class="capture-area" id="captureArea">
     <div class="placeholder" id="placeholder">
-      <div class="icon">ðï¸</div>
-      <p>ã¯ã©ãã®éæ¿ã»ã·ã£ããã®<br>åçªé¨åãæ®å½±ãã¦ãã ãã</p>
-      <div class="hint">ã¢ãã«åã»ã­ããè§ã»ã·ã£ããæå ±ãèªåæ½åº</div>
+      <div class="icon">🏌️</div>
+      <p>クラブの銘板・シャフトの<br>型番部分を撮影してください</p>
+      <div class="hint">モデル名・ロフト角・シャフト情報を自動抽出</div>
     </div>
-    <img id="preview" style="display:none" alt="ãã¬ãã¥ã¼">
+    <img id="preview" style="display:none" alt="プレビュー">
   </div>
 
   <div class="btn-row">
-    <button class="btn btn-camera" onclick="openCamera()">ð· æ®å½±</button>
-    <button class="btn btn-gallery" onclick="openGallery()">ð¼ é¸æ</button>
+    <button class="btn btn-camera" onclick="openCamera()">📷 撮影</button>
+    <button class="btn btn-gallery" onclick="openGallery()">🖼 選択</button>
   </div>
 
   <button class="btn-scan" id="scanBtn" onclick="startOCR()">
-    ð åçªãèª­ã¿åã
+    🔍 型番を読み取る
   </button>
 
   <div class="progress-container" id="progressContainer">
     <div class="progress-bar-bg">
       <div class="progress-bar" id="progressBar"></div>
     </div>
-    <div class="progress-label" id="progressLabel">æºåä¸­...</div>
+    <div class="progress-label" id="progressLabel">準備中...</div>
   </div>
 
   <!-- Model Number Result Card -->
   <div class="model-card" id="modelCard">
     <div class="model-card-header">
-      <h3>â³ æ¤åºãããåçª</h3>
+      <h3>⛳ 検出された型番</h3>
       <span id="confBadge" class="confidence-badge"></span>
     </div>
     <div class="model-number">
       <div class="detected" id="detectedModel" onclick="copyModel()"></div>
-      <div class="tap-hint">ã¿ããã§ã³ãã¼</div>
-      <input type="text" id="modelInput" placeholder="åçªãä¿®æ­£ã»å¥å">
+      <div class="tap-hint">タップでコピー</div>
+      <input type="text" id="modelInput" placeholder="型番を修正・入力">
     </div>
     <div class="search-grid">
-      <a class="search-btn mercari" id="linkMercari" target="_blank">ð´ ã¡ã«ã«ãª</a>
-      <a class="search-btn yahoo" id="linkYahoo" target="_blank">ð  ã¤ããªã¯</a>
-      <a class="search-btn rakuten" id="linkRakuten" target="_blank">ð´ æ¥½å¤©</a>
-      <a class="search-btn amazon" id="linkAmazon" target="_blank">ð¡ Amazon</a>
-      <a class="search-btn golfdo" id="linkGolfdo" target="_blank">â³ ã´ã«ããã¥</a>
-      <a class="search-btn google" id="linkGoogle" target="_blank">ðµ Google</a>
+      <a class="search-btn mercari" id="linkMercari" target="_blank">🔴 メルカリ</a>
+      <a class="search-btn yahoo" id="linkYahoo" target="_blank">🟠 ヤフオク</a>
+      <a class="search-btn rakuten" id="linkRakuten" target="_blank">🔴 楽天</a>
+      <a class="search-btn amazon" id="linkAmazon" target="_blank">🟡 Amazon</a>
+      <a class="search-btn golfdo" id="linkGolfdo" target="_blank">⛳ ゴルフドゥ</a>
+      <a class="search-btn google" id="linkGoogle" target="_blank">🔵 Google</a>
     </div>
   </div>
 
   <!-- Raw OCR Text -->
   <div class="raw-text-section" id="rawTextSection">
     <div class="raw-text-toggle" id="rawToggle" onclick="toggleRawText()">
-      <span>å¨æãã­ã¹ããè¡¨ç¤º</span>
-      <span class="arrow">â¼</span>
+      <span>全文テキストを表示</span>
+      <span class="arrow">▼</span>
     </div>
     <div class="raw-text-box" id="rawTextBox"></div>
   </div>
 
   <div class="tips" id="tips">
-    <h3>èª­ã¿åãã®ã³ã</h3>
+    <h3>読み取りのコツ</h3>
     <ul>
-      <li>ã·ã£ããã®å°å­ãã½ã¼ã«é¨åã®å»å°ãçã</li>
-      <li>éæ¿ãæ°´å¹³ã«ãªãããè§åº¦ãèª¿æ´</li>
-      <li>æããå ´æã§å½±ãå¥ããªãããã«æ®å½±</li>
-      <li>èª­ã¿åãå¾ãåçªã¯æåã§ä¿®æ­£å¯è½</li>
+      <li>シャフトの印字やソール部分の刻印を狙う</li>
+      <li>銘板が水平になるよう角度を調整</li>
+      <li>明るい場所で影が入らないように撮影</li>
+      <li>読み取り後、型番は手動で修正可能</li>
     </ul>
   </div>
 
@@ -623,22 +623,22 @@
 <!-- History Page -->
 <div class="page" id="pageHistory">
   <div class="history-empty" id="historyEmpty">
-    <div class="icon">ð</div>
-    <p>ã¾ã èª­ã¿åãå±¥æ­´ãããã¾ãã</p>
+    <div class="icon">📋</div>
+    <p>まだ読み取り履歴がありません</p>
   </div>
   <div class="history-list" id="historyList"></div>
-  <button class="history-clear" id="historyClearBtn" onclick="clearHistory()" style="display:none">å±¥æ­´ãã¯ãªã¢</button>
+  <button class="history-clear" id="historyClearBtn" onclick="clearHistory()" style="display:none">履歴をクリア</button>
 </div>
 
 <!-- Bottom Navigation -->
 <div class="bottom-nav">
   <div class="nav-item active" onclick="switchPage('scan')" id="navScan">
-    <span class="nav-icon">ð·</span>
-    ã¹ã­ã£ã³
+    <span class="nav-icon">📷</span>
+    スキャン
   </div>
   <div class="nav-item" onclick="switchPage('history')" id="navHistory">
-    <span class="nav-icon">ð</span>
-    å±¥æ­´
+    <span class="nav-icon">📋</span>
+    履歴
   </div>
 </div>
 
@@ -677,17 +677,17 @@ const golfBrands = [
   'ONOFF', 'DAIWA', 'GLOBERIDE', 'KATANA', 'MARUMAN', 'RYOMA',
   'BALDO', 'EPON', 'MIURA', 'JUSTICK', 'NEXGEN', 'YONEX',
   'TOURSTAGE', 'MACGREGOR', 'ADAMS', 'WILSON', 'NIKE',
-  'ãã¼ã©ã¼ã¡ã¤ã', 'ã­ã£ã­ã¦ã§ã¤', 'ã¿ã¤ããªã¹ã', 'ãã³', 'ããºã',
-  'ããªãã¹ãã³', 'ãã³ã­ãã', 'ã¼ã¯ã·ãª', 'ã¹ãªã¯ã½ã³', 'ãã³ã',
-  'ã¤ãã', 'ãªããã»ã¤', 'ã³ãã©', 'ã¯ãªã¼ãã©ã³ã', 'ãã©ã¼ãã£ã¼ã³',
-  'ãªãã', 'ã«ã¿ã', 'ãã«ãã³', 'ãªã§ã¼ã', 'ã¨ããã¯ã¹'
+  'テーラーメイド', 'キャロウェイ', 'タイトリスト', 'ピン', 'ミズノ',
+  'ブリヂストン', 'ダンロップ', 'ゼクシオ', 'スリクソン', 'ホンマ',
+  'ヤマハ', 'オデッセイ', 'コブラ', 'クリーブランド', 'フォーティーン',
+  'オノフ', 'カタナ', 'マルマン', 'リョーマ', 'ヨネックス'
 ];
 
 const shaftBrands = [
   'DYNAMIC GOLD', 'NS PRO', 'MODUS', 'PROJECT X', 'KBS', 'TRUE TEMPER',
   'GRAPHITE DESIGN', 'FUJIKURA', 'MITSUBISHI', 'DIAMANA', 'SPEEDER',
   'TOUR AD', 'VENTUS', 'TENSEI', 'ATTAS', 'SHAFT',
-  'ãã¤ãããã¯ã´ã¼ã«ã', 'ã¢ã¼ãã¹', 'ãã£ã¢ãã', 'ã¹ãã¼ãã¼', 'ãã¢ã¼AD'
+  'ダイナミックゴールド', 'モーダス', 'ディアマナ', 'スピーダー', 'ツアーAD'
 ];
 
 // Known model patterns (common golf club model names/numbers)
@@ -697,9 +697,9 @@ const modelPatterns = [
   /\b\d{3,4}[\s-]?[A-Z]{1,3}\b/g,                  // e.g., 913D, 620MB
   /\b[A-Z]+[\s-]\d+[\s-][A-Z]+\b/g,                // e.g., ROGUE ST MAX
   /\b(?:PRO|MAX|MINI|PLUS|LS|ST|Ti|SE|LTD)\b/gi,  // Common suffixes
-  /\d{1,2}(?:\.\d)?Â°/g,                             // Loft angles: 10.5Â°, 9Â°
+  /\d{1,2}(?:\.\d)?°/g,                             // Loft angles: 10.5°, 9°
   /\b[SRX]{1}[\s-]?(?:FLEX|flex)\b/g,              // Flex info
-  /\b(?:S|SR|R|A|L|X|XX)[\s-](?:ã·ã£ãã|shaft)\b/gi,
+  /\b(?:S|SR|R|A|L|X|XX)[\s-](?:シャフト|shaft)\b/gi,
 ];
 
 function extractModelInfo(text) {
@@ -755,7 +755,7 @@ function extractModelInfo(text) {
 
     // Lines with alphanumeric mix that look like product codes
     if (hasNumbers && hasLetters && line.length >= 3 && line.length <= 25) {
-      if (/^[A-Za-z0-9\s\-\.Â°]+$/.test(line)) {
+      if (/^[A-Za-z0-9\s\-\.°]+$/.test(line)) {
         foundModels.push(line);
       }
     }
@@ -796,14 +796,14 @@ function extractModelInfo(text) {
 
 // ===== Search URLs =====
 function updateSearchLinks(query) {
-  const q = encodeURIComponent('ã´ã«ã ' + query);
+  const q = encodeURIComponent('ゴルフ ' + query);
   const qPlain = encodeURIComponent(query);
   document.getElementById('linkMercari').href = `https://www.mercari.com/jp/search/?keyword=${q}&category_root=780`;
   document.getElementById('linkYahoo').href = `https://auctions.yahoo.co.jp/search/search?p=${q}&auccat=25458`;
   document.getElementById('linkRakuten').href = `https://search.rakuten.co.jp/search/mall/${q}/101164/`;
   document.getElementById('linkAmazon').href = `https://www.amazon.co.jp/s?k=${q}&i=sporting`;
   document.getElementById('linkGolfdo').href = `https://www.golfdo.com/cgi-bin/search/item_list.cgi?k=${qPlain}`;
-  document.getElementById('linkGoogle').href = `https://www.google.com/search?q=${q}+ä¸­å¤+ç¸å ´`;
+  document.getElementById('linkGoogle').href = `https://www.google.com/search?q=${q}+中古+相場`;
 }
 
 // ===== Navigation =====
@@ -854,13 +854,13 @@ async function startOCR() {
   if (!currentImageData) return;
 
   scanBtn.disabled = true;
-  scanBtn.innerHTML = '<span class="spinner"></span> èª­ã¿åãä¸­...';
+  scanBtn.innerHTML = '<span class="spinner"></span> 読み取り中...';
   progressContainer.classList.add('visible');
   modelCard.classList.remove('visible');
   rawTextSection.classList.remove('visible');
   progressBar.style.width = '0%';
   progressBar.style.background = 'linear-gradient(90deg, var(--green), var(--green-bright))';
-  progressLabel.textContent = 'æ¥æ¬èªãã¼ã¿ãèª­ã¿è¾¼ã¿ä¸­...';
+  progressLabel.textContent = '日本語データを読み込み中...';
 
   try {
     const result = await Tesseract.recognize(
@@ -871,13 +871,13 @@ async function startOCR() {
           if (m.status === 'recognizing text') {
             const pct = Math.round(m.progress * 100);
             progressBar.style.width = pct + '%';
-            progressLabel.textContent = `ãã­ã¹ãèªè­ä¸­... ${pct}%`;
+            progressLabel.textContent = `テキスト認識中... ${pct}%`;
           } else if (m.status === 'loading language traineddata') {
             const pct = Math.round(m.progress * 100);
             progressBar.style.width = (pct * 0.5) + '%';
-            progressLabel.textContent = `è¨èªãã¼ã¿èª­ã¿è¾¼ã¿ä¸­... ${pct}%`;
+            progressLabel.textContent = `言語データ読み込み中... ${pct}%`;
           } else if (m.status === 'initializing api') {
-            progressLabel.textContent = 'OCRã¨ã³ã¸ã³åæåä¸­...';
+            progressLabel.textContent = 'OCRエンジン初期化中...';
           }
         }
       }
@@ -895,7 +895,7 @@ async function startOCR() {
     updateSearchLinks(modelInfo);
 
     // Confidence badge
-    confBadge.textContent = `ç²¾åº¦ ${conf}%`;
+    confBadge.textContent = `精度 ${conf}%`;
     if (conf >= 70) confBadge.className = 'confidence-badge conf-high';
     else if (conf >= 40) confBadge.className = 'confidence-badge conf-mid';
     else confBadge.className = 'confidence-badge conf-low';
@@ -918,13 +918,13 @@ async function startOCR() {
     }, 100);
 
   } catch (err) {
-    progressLabel.textContent = 'ã¨ã©ã¼: ' + err.message;
+    progressLabel.textContent = 'エラー: ' + err.message;
     progressBar.style.width = '100%';
     progressBar.style.background = 'var(--red)';
     console.error('OCR Error:', err);
   } finally {
     scanBtn.disabled = false;
-    scanBtn.innerHTML = 'ð åçªãèª­ã¿åã';
+    scanBtn.innerHTML = '🔍 型番を読み取る';
   }
 }
 
@@ -941,7 +941,7 @@ function copyModel() {
 
   navigator.clipboard.writeText(text).then(() => {
     const original = detectedModel.textContent;
-    detectedModel.textContent = 'ã³ãã¼ãã¾ãã â';
+    detectedModel.textContent = 'コピーしました ✓';
     detectedModel.style.color = 'var(--green-bright)';
     setTimeout(() => {
       detectedModel.textContent = original;
@@ -1007,7 +1007,7 @@ function renderHistory() {
         <div class="model-name">${escapeHtml(item.model)}</div>
         <div class="timestamp">${item.timestamp}</div>
       </div>
-      <span class="search-icon">â</span>
+      <span class="search-icon">→</span>
     </div>
   `).join('');
 }
@@ -1037,7 +1037,7 @@ function searchFromHistory(index) {
 }
 
 function clearHistory() {
-  if (confirm('èª­ã¿åãå±¥æ­´ããã¹ã¦åé¤ãã¾ããï¼')) {
+  if (confirm('読み取り履歴をすべて削除しますか？')) {
     scanHistory = [];
     renderHistory();
   }
