@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>ゴルフせどり OCR</title>
+<title>ゴルフせどり 検索</title>
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -19,6 +19,7 @@
     --text-muted: #8b949e;
     --orange: #d29922;
     --red: #f85149;
+    --purple: #a371f7;
   }
 
   body {
@@ -58,11 +59,7 @@
     font-size: 20px;
   }
 
-  .app-header h1 {
-    font-size: 18px;
-    font-weight: 700;
-    color: #fff;
-  }
+  .app-header h1 { font-size: 18px; font-weight: 700; color: #fff; }
 
   .app-header .subtitle {
     font-size: 11px;
@@ -70,31 +67,6 @@
     font-weight: 500;
     letter-spacing: 1px;
     text-transform: uppercase;
-  }
-
-  /* ===== Tab Navigation ===== */
-  .tabs {
-    display: flex;
-    background: var(--card);
-    border-bottom: 1px solid var(--border);
-  }
-
-  .tab {
-    flex: 1;
-    padding: 12px 8px;
-    text-align: center;
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--text-muted);
-    cursor: pointer;
-    border-bottom: 2px solid transparent;
-    transition: all 0.2s;
-    -webkit-tap-highlight-color: transparent;
-  }
-
-  .tab.active {
-    color: var(--green-bright);
-    border-bottom-color: var(--green-bright);
   }
 
   /* ===== Main Content ===== */
@@ -123,11 +95,7 @@
     display: block;
   }
 
-  .placeholder {
-    text-align: center;
-    padding: 36px 20px;
-  }
-
+  .placeholder { text-align: center; padding: 36px 20px; }
   .placeholder .icon { font-size: 44px; margin-bottom: 10px; }
 
   .placeholder p {
@@ -162,9 +130,236 @@
   }
 
   .btn:active { transform: scale(0.97); }
-
   .btn-camera { background: var(--green); color: #fff; }
   .btn-gallery { background: var(--card); color: var(--text); border: 1px solid var(--border); }
+
+  /* ===== Image Search Section ===== */
+  .image-search-section {
+    display: none;
+    margin-top: 16px;
+  }
+
+  .image-search-section.visible { display: block; }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .section-header h2 {
+    font-size: 15px;
+    font-weight: 700;
+    color: #fff;
+  }
+
+  .section-header .badge {
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 10px;
+    background: var(--blue);
+    color: #fff;
+    letter-spacing: 0.5px;
+  }
+
+  .image-search-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .img-search-btn {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px;
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    background: var(--card);
+    cursor: pointer;
+    transition: all 0.15s;
+    -webkit-tap-highlight-color: transparent;
+    text-decoration: none;
+    color: var(--text);
+  }
+
+  .img-search-btn:active { transform: scale(0.98); border-color: var(--green); }
+
+  .img-search-btn .icon-circle {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+  }
+
+  .img-search-btn .btn-text {
+    flex: 1;
+  }
+
+  .img-search-btn .btn-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #fff;
+  }
+
+  .img-search-btn .btn-desc {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 2px;
+    line-height: 1.4;
+  }
+
+  .img-search-btn .btn-arrow {
+    font-size: 18px;
+    color: var(--text-muted);
+  }
+
+  .img-search-btn.google-lens .icon-circle {
+    background: linear-gradient(135deg, #4285f4, #34a853);
+  }
+
+  .img-search-btn.share-btn .icon-circle {
+    background: linear-gradient(135deg, var(--purple), #8957e5);
+  }
+
+  .img-search-btn.mercari-img .icon-circle {
+    background: linear-gradient(135deg, #e04040, #ff6060);
+  }
+
+  .share-not-supported {
+    display: none;
+    font-size: 12px;
+    color: var(--text-muted);
+    text-align: center;
+    padding: 8px;
+    background: var(--card);
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    margin-top: 4px;
+  }
+
+  /* ===== Divider ===== */
+  .section-divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 20px 0 16px;
+    color: var(--text-muted);
+    font-size: 12px;
+  }
+
+  .section-divider::before,
+  .section-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* ===== Text Search Section ===== */
+  .text-search-section {
+    display: none;
+    margin-top: 0;
+  }
+
+  .text-search-section.visible { display: block; }
+
+  .text-input-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+
+  .text-input-row input {
+    flex: 1;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-size: 15px;
+    font-weight: 600;
+    color: #fff;
+    outline: none;
+  }
+
+  .text-input-row input:focus { border-color: var(--green); }
+
+  .text-input-row input::placeholder { color: #484f58; font-weight: 400; }
+
+  .search-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .search-btn {
+    padding: 12px 10px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--text);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: all 0.15s;
+    -webkit-tap-highlight-color: transparent;
+    text-decoration: none;
+  }
+
+  .search-btn:active { transform: scale(0.96); }
+  .search-btn.mercari { border-color: #e04040; color: #ff6060; }
+  .search-btn.yahoo { border-color: #ff6633; color: #ff8855; }
+  .search-btn.rakuten { border-color: #bf0000; color: #ff4444; }
+  .search-btn.amazon { border-color: #ff9900; color: #ffaa33; }
+  .search-btn.google { border-color: var(--blue); color: var(--blue); }
+  .search-btn.golfdo { border-color: var(--green); color: var(--green-bright); }
+
+  /* ===== OCR Section (collapsed) ===== */
+  .ocr-toggle-section {
+    display: none;
+    margin-top: 16px;
+  }
+
+  .ocr-toggle-section.visible { display: block; }
+
+  .ocr-toggle-btn {
+    width: 100%;
+    padding: 13px;
+    background: var(--card);
+    color: var(--text-muted);
+    font-size: 13px;
+    font-weight: 600;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .ocr-toggle-btn:active { transform: scale(0.97); }
+
+  .ocr-content {
+    display: none;
+    margin-top: 10px;
+  }
+
+  .ocr-content.visible { display: block; }
 
   .btn-scan {
     width: 100%;
@@ -176,7 +371,7 @@
     border: none;
     border-radius: 12px;
     cursor: pointer;
-    display: none;
+    display: flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
@@ -186,7 +381,6 @@
 
   .btn-scan:active { transform: scale(0.97); }
   .btn-scan:disabled { opacity: 0.6; }
-  .btn-scan.visible { display: flex; }
 
   /* ===== Progress ===== */
   .progress-container { display: none; margin: 14px 0; }
@@ -240,10 +434,7 @@
     color: var(--green-bright);
   }
 
-  .model-number {
-    padding: 16px;
-    text-align: center;
-  }
+  .model-number { padding: 16px; text-align: center; }
 
   .model-number .detected {
     font-size: 26px;
@@ -257,73 +448,23 @@
     transition: background 0.2s;
   }
 
-  .model-number .detected:active {
-    background: #30363d;
-  }
+  .model-number .detected:active { background: #30363d; }
+  .model-number .tap-hint { font-size: 11px; color: var(--text-muted); margin-top: 6px; }
 
-  .model-number .tap-hint {
+  .confidence-badge {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 4px;
     font-size: 11px;
-    color: var(--text-muted);
-    margin-top: 6px;
-  }
-
-  .model-number input {
-    width: 100%;
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 12px;
-    font-size: 18px;
-    font-weight: 700;
-    color: #fff;
-    text-align: center;
-    margin-top: 8px;
-    outline: none;
-  }
-
-  .model-number input:focus { border-color: var(--green); }
-
-  /* ===== Search Buttons ===== */
-  .search-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
-    padding: 0 16px 16px;
-  }
-
-  .search-btn {
-    padding: 12px 10px;
-    border-radius: 10px;
-    border: 1px solid var(--border);
-    background: var(--bg);
-    color: var(--text);
-    font-size: 13px;
     font-weight: 600;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    transition: all 0.15s;
-    -webkit-tap-highlight-color: transparent;
-    text-decoration: none;
   }
 
-  .search-btn:active { transform: scale(0.96); }
+  .conf-high { background: #1a472a; color: var(--green-bright); }
+  .conf-mid { background: #3d2e00; color: var(--orange); }
+  .conf-low { background: #3d1010; color: var(--red); }
 
-  .search-btn.mercari { border-color: #e04040; color: #ff6060; }
-  .search-btn.yahoo { border-color: #ff6633; color: #ff8855; }
-  .search-btn.rakuten { border-color: #bf0000; color: #ff4444; }
-  .search-btn.amazon { border-color: #ff9900; color: #ffaa33; }
-  .search-btn.google { border-color: var(--blue); color: var(--blue); }
-  .search-btn.golfdo { border-color: var(--green); color: var(--green-bright); }
-
-  /* ===== Full OCR Text ===== */
-  .raw-text-section {
-    display: none;
-    margin-top: 16px;
-  }
-
+  /* ===== Raw OCR Text ===== */
+  .raw-text-section { display: none; margin-top: 12px; }
   .raw-text-section.visible { display: block; }
 
   .raw-text-toggle {
@@ -338,17 +479,8 @@
     -webkit-tap-highlight-color: transparent;
   }
 
-  .raw-text-toggle span {
-    font-size: 13px;
-    color: var(--text-muted);
-    font-weight: 500;
-  }
-
-  .raw-text-toggle .arrow {
-    transition: transform 0.2s;
-    color: var(--text-muted);
-  }
-
+  .raw-text-toggle span { font-size: 13px; color: var(--text-muted); font-weight: 500; }
+  .raw-text-toggle .arrow { transition: transform 0.2s; color: var(--text-muted); }
   .raw-text-toggle.open .arrow { transform: rotate(180deg); }
 
   .raw-text-box {
@@ -370,27 +502,9 @@
 
   .raw-text-box.open { display: block; }
 
-  .confidence-badge {
-    display: inline-block;
-    padding: 3px 8px;
-    border-radius: 4px;
-    font-size: 11px;
-    font-weight: 600;
-  }
-
-  .conf-high { background: #1a472a; color: var(--green-bright); }
-  .conf-mid { background: #3d2e00; color: var(--orange); }
-  .conf-low { background: #3d1010; color: var(--red); }
-
   /* ===== History Tab ===== */
-  .history-empty {
-    text-align: center;
-    padding: 60px 20px;
-    color: var(--text-muted);
-  }
-
+  .history-empty { text-align: center; padding: 60px 20px; color: var(--text-muted); }
   .history-empty .icon { font-size: 40px; margin-bottom: 12px; }
-
   .history-list { display: flex; flex-direction: column; gap: 8px; }
 
   .history-item {
@@ -428,16 +542,8 @@
     text-overflow: ellipsis;
   }
 
-  .history-item .timestamp {
-    font-size: 11px;
-    color: var(--text-muted);
-    margin-top: 2px;
-  }
-
-  .history-item .search-icon {
-    color: var(--text-muted);
-    font-size: 18px;
-  }
+  .history-item .timestamp { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+  .history-item .search-icon { color: var(--text-muted); font-size: 18px; }
 
   .history-clear {
     display: block;
@@ -460,13 +566,7 @@
     border: 1px solid var(--border);
   }
 
-  .tips h3 {
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--text-muted);
-    margin-bottom: 8px;
-  }
-
+  .tips h3 { font-size: 13px; font-weight: 600; color: var(--text-muted); margin-bottom: 8px; }
   .tips ul { list-style: none; }
 
   .tips li {
@@ -524,10 +624,7 @@
   }
 
   @keyframes spin { to { transform: rotate(360deg); } }
-
-  .fade-in {
-    animation: fadeIn 0.3s ease;
-  }
+  .fade-in { animation: fadeIn 0.3s ease; }
 
   @keyframes fadeIn {
     from { opacity: 0; transform: translateY(8px); }
@@ -542,22 +639,20 @@
   <div class="logo">
     <div class="logo-icon">⛳</div>
     <div>
-      <h1>Golf Sedori OCR</h1>
-      <div class="subtitle">型番スキャナー</div>
+      <h1>ゴルフせどり 検索</h1>
+      <div class="subtitle">写真で相場をチェック</div>
     </div>
   </div>
 </div>
 
-<!-- ===== Pages ===== -->
-
-<!-- Scan Page -->
+<!-- ===== Scan Page ===== -->
 <div class="page active" id="pageScan">
 
   <div class="capture-area" id="captureArea">
     <div class="placeholder" id="placeholder">
-      <div class="icon">🏌️</div>
-      <p>クラブの銘板・シャフトの<br>型番部分を撮影してください</p>
-      <div class="hint">モデル名・ロフト角・シャフト情報を自動抽出</div>
+      <div class="icon">📸</div>
+      <p>ゴルフクラブ・値札を<br>撮影してください</p>
+      <div class="hint">写真から類似商品を各サイトで検索できます</div>
     </div>
     <img id="preview" style="display:none" alt="プレビュー">
   </div>
@@ -567,27 +662,54 @@
     <button class="btn btn-gallery" onclick="openGallery()">🖼 選択</button>
   </div>
 
-  <button class="btn-scan" id="scanBtn" onclick="startOCR()">
-    🔍 型番を読み取る
-  </button>
-
-  <div class="progress-container" id="progressContainer">
-    <div class="progress-bar-bg">
-      <div class="progress-bar" id="progressBar"></div>
+  <!-- ===== Image Search Section (Primary) ===== -->
+  <div class="image-search-section" id="imageSearchSection">
+    <div class="section-header">
+      <h2>📷 この画像で検索</h2>
+      <span class="badge">おすすめ</span>
     </div>
-    <div class="progress-label" id="progressLabel">準備中...</div>
+    <div class="image-search-grid">
+
+      <div class="img-search-btn google-lens" onclick="openGoogleLens()">
+        <div class="icon-circle">🔍</div>
+        <div class="btn-text">
+          <div class="btn-title">Google レンズ</div>
+          <div class="btn-desc">画像から類似商品を自動検索</div>
+        </div>
+        <div class="btn-arrow">→</div>
+      </div>
+
+      <div class="img-search-btn mercari-img" onclick="openMercariApp()">
+        <div class="icon-circle">🔴</div>
+        <div class="btn-text">
+          <div class="btn-title">メルカリ 写真検索</div>
+          <div class="btn-desc">メルカリアプリの写真検索へ</div>
+        </div>
+        <div class="btn-arrow">→</div>
+      </div>
+
+      <div class="img-search-btn share-btn" id="shareBtn" onclick="shareImage()">
+        <div class="icon-circle">📤</div>
+        <div class="btn-text">
+          <div class="btn-title">画像を共有</div>
+          <div class="btn-desc">他のアプリに画像を送って検索</div>
+        </div>
+        <div class="btn-arrow">→</div>
+      </div>
+
+    </div>
+    <div class="share-not-supported" id="shareNotSupported">
+      このブラウザでは画像共有に対応していません。<br>画像を長押しして保存後、各アプリで利用してください。
+    </div>
   </div>
 
-  <!-- Model Number Result Card -->
-  <div class="model-card" id="modelCard">
-    <div class="model-card-header">
-      <h3>⛳ 検出された型番</h3>
-      <span id="confBadge" class="confidence-badge"></span>
-    </div>
-    <div class="model-number">
-      <div class="detected" id="detectedModel" onclick="copyModel()"></div>
-      <div class="tap-hint">タップでコピー</div>
-      <input type="text" id="modelInput" placeholder="型番を修正・入力">
+  <!-- ===== Divider ===== -->
+  <div class="section-divider" id="textDivider" style="display:none">テキストで検索</div>
+
+  <!-- ===== Text Search Section ===== -->
+  <div class="text-search-section" id="textSearchSection">
+    <div class="text-input-row">
+      <input type="text" id="textSearchInput" placeholder="ブランド名・型番を入力" oninput="updateSearchLinks(this.value)">
     </div>
     <div class="search-grid">
       <a class="search-btn mercari" id="linkMercari" target="_blank">🔴 メルカリ</a>
@@ -599,42 +721,71 @@
     </div>
   </div>
 
-  <!-- Raw OCR Text -->
-  <div class="raw-text-section" id="rawTextSection">
-    <div class="raw-text-toggle" id="rawToggle" onclick="toggleRawText()">
-      <span>全文テキストを表示</span>
-      <span class="arrow">▼</span>
+  <!-- ===== OCR Section (Secondary) ===== -->
+  <div class="ocr-toggle-section" id="ocrToggleSection">
+    <button class="ocr-toggle-btn" onclick="toggleOcrSection()">
+      📝 テキスト自動読み取り（OCR）
+    </button>
+    <div class="ocr-content" id="ocrContent">
+      <button class="btn-scan" id="scanBtn" onclick="startOCR()">
+        🔍 型番を読み取る
+      </button>
+
+      <div class="progress-container" id="progressContainer">
+        <div class="progress-bar-bg">
+          <div class="progress-bar" id="progressBar"></div>
+        </div>
+        <div class="progress-label" id="progressLabel">準備中...</div>
+      </div>
+
+      <div class="model-card" id="modelCard">
+        <div class="model-card-header">
+          <h3>⛳ 検出された型番</h3>
+          <span id="confBadge" class="confidence-badge"></span>
+        </div>
+        <div class="model-number">
+          <div class="detected" id="detectedModel" onclick="copyModel()"></div>
+          <div class="tap-hint">タップでコピー</div>
+        </div>
+      </div>
+
+      <div class="raw-text-section" id="rawTextSection">
+        <div class="raw-text-toggle" id="rawToggle" onclick="toggleRawText()">
+          <span>OCR全文テキスト</span>
+          <span class="arrow">▼</span>
+        </div>
+        <div class="raw-text-box" id="rawTextBox"></div>
+      </div>
     </div>
-    <div class="raw-text-box" id="rawTextBox"></div>
   </div>
 
   <div class="tips" id="tips">
-    <h3>読み取りのコツ</h3>
+    <h3>使い方</h3>
     <ul>
-      <li>シャフトの印字やソール部分の刻印を狙う</li>
-      <li>銘板が水平になるよう角度を調整</li>
-      <li>明るい場所で影が入らないように撮影</li>
-      <li>読み取り後、型番は手動で修正可能</li>
+      <li>クラブ全体や値札を撮影</li>
+      <li>Google レンズで類似商品を一括検索</li>
+      <li>メルカリの写真検索で出品中の類似品を確認</li>
+      <li>ブランド名がわかればテキスト検索も可能</li>
     </ul>
   </div>
 
 </div>
 
-<!-- History Page -->
+<!-- ===== History Page ===== -->
 <div class="page" id="pageHistory">
   <div class="history-empty" id="historyEmpty">
     <div class="icon">📋</div>
-    <p>まだ読み取り履歴がありません</p>
+    <p>まだ検索履歴がありません</p>
   </div>
   <div class="history-list" id="historyList"></div>
   <button class="history-clear" id="historyClearBtn" onclick="clearHistory()" style="display:none">履歴をクリア</button>
 </div>
 
-<!-- Bottom Navigation -->
+<!-- ===== Bottom Navigation ===== -->
 <div class="bottom-nav">
   <div class="nav-item active" onclick="switchPage('scan')" id="navScan">
     <span class="nav-icon">📷</span>
-    スキャン
+    検索
   </div>
   <div class="nav-item" onclick="switchPage('history')" id="navHistory">
     <span class="nav-icon">📋</span>
@@ -653,149 +804,204 @@ const galleryInput = document.getElementById('galleryInput');
 const preview = document.getElementById('preview');
 const placeholder = document.getElementById('placeholder');
 const captureArea = document.getElementById('captureArea');
+const imageSearchSection = document.getElementById('imageSearchSection');
+const textDivider = document.getElementById('textDivider');
+const textSearchSection = document.getElementById('textSearchSection');
+const ocrToggleSection = document.getElementById('ocrToggleSection');
 const scanBtn = document.getElementById('scanBtn');
 const progressContainer = document.getElementById('progressContainer');
 const progressBar = document.getElementById('progressBar');
 const progressLabel = document.getElementById('progressLabel');
 const modelCard = document.getElementById('modelCard');
 const detectedModel = document.getElementById('detectedModel');
-const modelInput = document.getElementById('modelInput');
 const confBadge = document.getElementById('confBadge');
 const rawTextSection = document.getElementById('rawTextSection');
 const rawToggle = document.getElementById('rawToggle');
 const rawTextBox = document.getElementById('rawTextBox');
 const tips = document.getElementById('tips');
+const textSearchInput = document.getElementById('textSearchInput');
 
 let currentImageData = null;
+let currentImageBlob = null;
 let scanHistory = [];
 
-// ===== Golf Brand & Model Patterns =====
-const golfBrands = [
-  'TITLEIST', 'CALLAWAY', 'TAYLORMADE', 'TAYLOR MADE', 'PING', 'MIZUNO',
-  'BRIDGESTONE', 'DUNLOP', 'XXIO', 'SRIXON', 'CLEVELAND', 'COBRA',
-  'ODYSSEY', 'SCOTTY CAMERON', 'HONMA', 'YAMAHA', 'PRGR', 'FOURTEEN',
-  'ONOFF', 'DAIWA', 'GLOBERIDE', 'KATANA', 'MARUMAN', 'RYOMA',
-  'BALDO', 'EPON', 'MIURA', 'JUSTICK', 'NEXGEN', 'YONEX',
-  'TOURSTAGE', 'MACGREGOR', 'ADAMS', 'WILSON', 'NIKE',
-  'テーラーメイド', 'キャロウェイ', 'タイトリスト', 'ピン', 'ミズノ',
-  'ブリヂストン', 'ダンロップ', 'ゼクシオ', 'スリクソン', 'ホンマ',
-  'ヤマハ', 'オデッセイ', 'コブラ', 'クリーブランド', 'フォーティーン',
-  'オノフ', 'カタナ', 'マルマン', 'リョーマ', 'ヨネックス'
-];
+// ===== Camera / Gallery =====
+function openCamera() { cameraInput.click(); }
+function openGallery() { galleryInput.click(); }
 
-const shaftBrands = [
-  'DYNAMIC GOLD', 'NS PRO', 'MODUS', 'PROJECT X', 'KBS', 'TRUE TEMPER',
-  'GRAPHITE DESIGN', 'FUJIKURA', 'MITSUBISHI', 'DIAMANA', 'SPEEDER',
-  'TOUR AD', 'VENTUS', 'TENSEI', 'ATTAS', 'SHAFT',
-  'ダイナミックゴールド', 'モーダス', 'ディアマナ', 'スピーダー', 'ツアーAD'
-];
+function handleImage(e) {
+  const file = e.target.files[0];
+  if (!file) return;
 
-// Known model patterns (common golf club model names/numbers)
-const modelPatterns = [
-  // Alphanumeric model patterns
-  /\b[A-Z]{2,}[\s-]?\d{2,4}[A-Z]?\b/g,           // e.g., SIM2, TSR3, G430
-  /\b\d{3,4}[\s-]?[A-Z]{1,3}\b/g,                  // e.g., 913D, 620MB
-  /\b[A-Z]+[\s-]\d+[\s-][A-Z]+\b/g,                // e.g., ROGUE ST MAX
-  /\b(?:PRO|MAX|MINI|PLUS|LS|ST|Ti|SE|LTD)\b/gi,  // Common suffixes
-  /\d{1,2}(?:\.\d)?°/g,                             // Loft angles: 10.5°, 9°
-  /\b[SRX]{1}[\s-]?(?:FLEX|flex)\b/g,              // Flex info
-  /\b(?:S|SR|R|A|L|X|XX)[\s-](?:シャフト|shaft)\b/gi,
-];
+  // Store blob for sharing
+  currentImageBlob = file;
 
-function extractModelInfo(text) {
-  const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
-  const upperText = text.toUpperCase();
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    currentImageData = ev.target.result;
+    preview.src = currentImageData;
+    preview.style.display = 'block';
+    placeholder.style.display = 'none';
+    captureArea.classList.add('has-image');
 
-  let foundBrand = '';
-  let foundModels = [];
-  let foundShaft = '';
+    // Show image search section
+    imageSearchSection.classList.add('visible');
+    imageSearchSection.classList.add('fade-in');
+    textDivider.style.display = '';
+    textSearchSection.classList.add('visible');
+    ocrToggleSection.classList.add('visible');
+    tips.style.display = 'none';
 
-  // 1. Find brand
-  for (const brand of golfBrands) {
-    if (upperText.includes(brand.toUpperCase())) {
-      foundBrand = brand;
-      break;
-    }
-  }
+    // Check Web Share API support
+    checkShareSupport();
 
-  // 2. Find shaft
-  for (const shaft of shaftBrands) {
-    if (upperText.includes(shaft.toUpperCase())) {
-      foundShaft = shaft;
-      break;
-    }
-  }
+    // Add to history
+    addToHistory('画像検索', currentImageData);
 
-  // 3. Extract model-like strings from each line
-  for (const line of lines) {
-    // Skip very short or very long lines
-    if (line.length < 2 || line.length > 60) continue;
-
-    // Check if line looks like a model identifier
-    const hasNumbers = /\d/.test(line);
-    const hasLetters = /[A-Za-z]/.test(line);
-    const lineUpper = line.toUpperCase();
-
-    // Check against model patterns
-    for (const pat of modelPatterns) {
-      pat.lastIndex = 0;
-      const matches = line.match(pat);
-      if (matches) {
-        foundModels.push(...matches);
-      }
-    }
-
-    // Lines that contain brand + something else are likely model identifiers
-    if (foundBrand && lineUpper.includes(foundBrand.toUpperCase()) && line.length > foundBrand.length + 2) {
-      const modelPart = line.replace(new RegExp(foundBrand, 'gi'), '').trim();
-      if (modelPart.length >= 2 && modelPart.length <= 30) {
-        foundModels.unshift(modelPart);
-      }
-    }
-
-    // Lines with alphanumeric mix that look like product codes
-    if (hasNumbers && hasLetters && line.length >= 3 && line.length <= 25) {
-      if (/^[A-Za-z0-9\s\-\.°]+$/.test(line)) {
-        foundModels.push(line);
-      }
-    }
-  }
-
-  // Deduplicate
-  foundModels = [...new Set(foundModels)].slice(0, 5);
-
-  // Build display string
-  let result = '';
-  if (foundBrand) result += foundBrand;
-  if (foundModels.length > 0) {
-    const mainModel = foundModels[0];
-    if (result && !mainModel.toUpperCase().includes(foundBrand.toUpperCase())) {
-      result += ' ' + mainModel;
-    } else if (!result) {
-      result = mainModel;
-    }
-  }
-  if (foundShaft && !result.toUpperCase().includes(foundShaft.toUpperCase())) {
-    result += ' / ' + foundShaft;
-  }
-
-  // Fallback: use the most model-like line
-  if (!result) {
-    const candidateLines = lines.filter(l =>
-      l.length >= 3 && l.length <= 40 &&
-      /[A-Za-z0-9]/.test(l) &&
-      !/^[\s\p{P}]+$/u.test(l)
-    );
-    if (candidateLines.length > 0) {
-      result = candidateLines[0];
-    }
-  }
-
-  return result || text.substring(0, 30);
+    // Scroll to image search
+    setTimeout(() => {
+      imageSearchSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 200);
+  };
+  reader.readAsDataURL(file);
+  e.target.value = '';
 }
 
-// ===== Search URLs =====
+cameraInput.addEventListener('change', handleImage);
+galleryInput.addEventListener('change', handleImage);
+
+// ===== Image Search Functions =====
+
+// Convert data URL to Blob
+function dataURLtoBlob(dataURL) {
+  const parts = dataURL.split(',');
+  const mime = parts[0].match(/:(.*?);/)[1];
+  const binary = atob(parts[1]);
+  const array = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) {
+    array[i] = binary.charCodeAt(i);
+  }
+  return new Blob([array], { type: mime });
+}
+
+// Google Lens - open via share or fallback to Google Images
+function openGoogleLens() {
+  if (!currentImageData) return;
+
+  // Try Web Share API first (most reliable on mobile)
+  if (navigator.share && navigator.canShare) {
+    const blob = dataURLtoBlob(currentImageData);
+    const file = new File([blob], 'golf-club.jpg', { type: 'image/jpeg' });
+    const shareData = { files: [file] };
+
+    if (navigator.canShare(shareData)) {
+      navigator.share(shareData).catch(() => {
+        // Fallback: open Google Images
+        window.open('https://images.google.com/', '_blank');
+      });
+      return;
+    }
+  }
+
+  // Fallback: open Google Images with instructions
+  window.open('https://images.google.com/', '_blank');
+  showToast('Google画像検索が開きます。カメラアイコンから画像をアップロードしてください');
+}
+
+// Mercari - open app or website
+function openMercariApp() {
+  if (!currentImageData) return;
+
+  // Try to open Mercari app via deep link
+  // Mercari app supports photo search internally
+  const mercariUrl = 'https://www.mercari.com/jp/';
+
+  // Try Web Share API to share image to Mercari app
+  if (navigator.share && navigator.canShare) {
+    const blob = dataURLtoBlob(currentImageData);
+    const file = new File([blob], 'golf-club.jpg', { type: 'image/jpeg' });
+    const shareData = { files: [file] };
+
+    if (navigator.canShare(shareData)) {
+      navigator.share(shareData).catch(() => {
+        window.open(mercariUrl, '_blank');
+      });
+      return;
+    }
+  }
+
+  window.open(mercariUrl, '_blank');
+  showToast('メルカリを開きます。アプリの写真検索機能をご利用ください');
+}
+
+// Share image to any app
+function shareImage() {
+  if (!currentImageData) return;
+
+  if (navigator.share && navigator.canShare) {
+    const blob = dataURLtoBlob(currentImageData);
+    const file = new File([blob], 'golf-club.jpg', { type: 'image/jpeg' });
+    const shareData = {
+      title: 'ゴルフクラブ画像',
+      text: 'ゴルフクラブの画像検索',
+      files: [file]
+    };
+
+    if (navigator.canShare(shareData)) {
+      navigator.share(shareData).catch((err) => {
+        if (err.name !== 'AbortError') {
+          showToast('共有に失敗しました');
+        }
+      });
+      return;
+    }
+  }
+
+  // Fallback
+  showToast('画像を長押しして保存後、各アプリで検索してください');
+}
+
+function checkShareSupport() {
+  if (!navigator.share || !navigator.canShare) {
+    document.getElementById('shareNotSupported').style.display = 'block';
+  }
+}
+
+// ===== Toast Notification =====
+function showToast(message) {
+  const existing = document.querySelector('.toast');
+  if (existing) existing.remove();
+
+  const toast = document.createElement('div');
+  toast.className = 'toast';
+  toast.textContent = message;
+  toast.style.cssText = `
+    position: fixed;
+    bottom: 100px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #30363d;
+    color: #e6edf3;
+    padding: 12px 20px;
+    border-radius: 10px;
+    font-size: 13px;
+    z-index: 200;
+    max-width: 340px;
+    text-align: center;
+    animation: fadeIn 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+  `;
+  document.body.appendChild(toast);
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transition = 'opacity 0.3s';
+    setTimeout(() => toast.remove(), 300);
+  }, 3000);
+}
+
+// ===== Text Search =====
 function updateSearchLinks(query) {
+  if (!query || query.trim().length === 0) return;
   const q = encodeURIComponent('ゴルフ ' + query);
   const qPlain = encodeURIComponent(query);
   document.getElementById('linkMercari').href = `https://www.mercari.com/jp/search/?keyword=${q}&category_root=780`;
@@ -804,6 +1010,12 @@ function updateSearchLinks(query) {
   document.getElementById('linkAmazon').href = `https://www.amazon.co.jp/s?k=${q}&i=sporting`;
   document.getElementById('linkGolfdo').href = `https://www.golfdo.com/cgi-bin/search/item_list.cgi?k=${qPlain}`;
   document.getElementById('linkGoogle').href = `https://www.google.com/search?q=${q}+中古+相場`;
+}
+
+// ===== OCR Section =====
+function toggleOcrSection() {
+  const content = document.getElementById('ocrContent');
+  content.classList.toggle('visible');
 }
 
 // ===== Navigation =====
@@ -821,33 +1033,100 @@ function switchPage(page) {
   }
 }
 
-// ===== Camera / Gallery =====
-function openCamera() { cameraInput.click(); }
-function openGallery() { galleryInput.click(); }
+// ===== Golf Brand & Model Patterns =====
+const golfBrands = [
+  'TITLEIST', 'CALLAWAY', 'TAYLORMADE', 'TAYLOR MADE', 'PING', 'MIZUNO',
+  'BRIDGESTONE', 'DUNLOP', 'XXIO', 'SRIXON', 'CLEVELAND', 'COBRA',
+  'ODYSSEY', 'SCOTTY CAMERON', 'HONMA', 'YAMAHA', 'PRGR', 'FOURTEEN',
+  'ONOFF', 'DAIWA', 'GLOBERIDE', 'KATANA', 'MARUMAN', 'RYOMA',
+  'BALDO', 'EPON', 'MIURA', 'JUSTICK', 'NEXGEN', 'YONEX',
+  'TOURSTAGE', 'MACGREGOR', 'ADAMS', 'WILSON', 'NIKE',
+  'テーラーメイド', 'キャロウェイ', 'タイトリスト', 'ピン', 'ミズノ',
+  'ブリッストン', 'ダンロップ', 'ゼクシオ', 'スリクソン', 'ホンマ',
+  'ヤマハ', 'オデッセイ', 'コブラ', 'クリーブランド', 'フォーティーン',
+  'オノフ', 'カタナ', 'マルマン', 'リョーマ', 'ヨネックス'
+];
 
-function handleImage(e) {
-  const file = e.target.files[0];
-  if (!file) return;
+const shaftBrands = [
+  'DYNAMIC GOLD', 'NS PRO', 'MODUS', 'PROJECT X', 'KBS', 'TRUE TEMPER',
+  'GRAPHITE DESIGN', 'FUJIKURA', 'MITSUBISHI', 'DIAMANA', 'SPEEDER',
+  'TOUR AD', 'VENTUS', 'TENSEI', 'ATTAS', 'SHAFT',
+  'ダイナミックゴールド', 'モーダス', 'ディアマナ', 'スピーダー', 'ツアーAD'
+];
 
-  const reader = new FileReader();
-  reader.onload = function(ev) {
-    currentImageData = ev.target.result;
-    preview.src = currentImageData;
-    preview.style.display = 'block';
-    placeholder.style.display = 'none';
-    captureArea.classList.add('has-image');
-    scanBtn.classList.add('visible');
-    modelCard.classList.remove('visible');
-    rawTextSection.classList.remove('visible');
-    tips.style.display = 'none';
-  };
-  reader.readAsDataURL(file);
-  // Reset input so same file can be re-selected
-  e.target.value = '';
+const modelPatterns = [
+  /\b[A-Z]{2,}[\s-]?\d{2,4}[A-Z]?\b/g,
+  /\b\d{3,4}[\s-]?[A-Z]{1,3}\b/g,
+  /\b[A-Z]+[\s-]\d+[\s-][A-Z]+\b/g,
+  /\b(?:PRO|MAX|MINI|PLUS|LS|ST|Ti|SE|LTD)\b/gi,
+  /\d{1,2}(?:\.\d)?°/g,
+  /\b[SRX]{1}[\s-]?(?:FLEX|flex)\b/g,
+  /\b(?:S|SR|R|A|L|X|XX)[\s-](?:シャフト|shaft)\b/gi,
+];
+
+function extractModelInfo(text) {
+  const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+  const upperText = text.toUpperCase();
+
+  let foundBrand = '';
+  let foundModels = [];
+  let foundShaft = '';
+
+  for (const brand of golfBrands) {
+    if (upperText.includes(brand.toUpperCase())) { foundBrand = brand; break; }
+  }
+
+  for (const shaft of shaftBrands) {
+    if (upperText.includes(shaft.toUpperCase())) { foundShaft = shaft; break; }
+  }
+
+  for (const line of lines) {
+    if (line.length < 2 || line.length > 60) continue;
+    const hasNumbers = /\d/.test(line);
+    const hasLetters = /[A-Za-z]/.test(line);
+    const lineUpper = line.toUpperCase();
+
+    for (const pat of modelPatterns) {
+      pat.lastIndex = 0;
+      const matches = line.match(pat);
+      if (matches) foundModels.push(...matches);
+    }
+
+    if (foundBrand && lineUpper.includes(foundBrand.toUpperCase()) && line.length > foundBrand.length + 2) {
+      const modelPart = line.replace(new RegExp(foundBrand, 'gi'), '').trim();
+      if (modelPart.length >= 2 && modelPart.length <= 30) foundModels.unshift(modelPart);
+    }
+
+    if (hasNumbers && hasLetters && line.length >= 3 && line.length <= 25) {
+      if (/^[A-Za-z0-9\s\-\.°]+$/.test(line)) foundModels.push(line);
+    }
+  }
+
+  foundModels = [...new Set(foundModels)].slice(0, 5);
+
+  let result = '';
+  if (foundBrand) result += foundBrand;
+  if (foundModels.length > 0) {
+    const mainModel = foundModels[0];
+    if (result && !mainModel.toUpperCase().includes(foundBrand.toUpperCase())) {
+      result += ' ' + mainModel;
+    } else if (!result) {
+      result = mainModel;
+    }
+  }
+  if (foundShaft && !result.toUpperCase().includes(foundShaft.toUpperCase())) {
+    result += ' / ' + foundShaft;
+  }
+
+  if (!result) {
+    const candidateLines = lines.filter(l =>
+      l.length >= 3 && l.length <= 40 && /[A-Za-z0-9]/.test(l) && !/^[\s\p{P}]+$/u.test(l)
+    );
+    if (candidateLines.length > 0) result = candidateLines[0];
+  }
+
+  return result || text.substring(0, 30);
 }
-
-cameraInput.addEventListener('change', handleImage);
-galleryInput.addEventListener('change', handleImage);
 
 // ===== OCR =====
 async function startOCR() {
@@ -863,38 +1142,30 @@ async function startOCR() {
   progressLabel.textContent = '日本語データを読み込み中...';
 
   try {
-    const result = await Tesseract.recognize(
-      currentImageData,
-      'jpn+eng',
-      {
-        logger: (m) => {
-          if (m.status === 'recognizing text') {
-            const pct = Math.round(m.progress * 100);
-            progressBar.style.width = pct + '%';
-            progressLabel.textContent = `テキスト認識中... ${pct}%`;
-          } else if (m.status === 'loading language traineddata') {
-            const pct = Math.round(m.progress * 100);
-            progressBar.style.width = (pct * 0.5) + '%';
-            progressLabel.textContent = `言語データ読み込み中... ${pct}%`;
-          } else if (m.status === 'initializing api') {
-            progressLabel.textContent = 'OCRエンジン初期化中...';
-          }
+    const result = await Tesseract.recognize(currentImageData, 'jpn+eng', {
+      logger: (m) => {
+        if (m.status === 'recognizing text') {
+          const pct = Math.round(m.progress * 100);
+          progressBar.style.width = pct + '%';
+          progressLabel.textContent = `テキスト認識中... ${pct}%`;
+        } else if (m.status === 'loading language traineddata') {
+          const pct = Math.round(m.progress * 100);
+          progressBar.style.width = (pct * 0.5) + '%';
+          progressLabel.textContent = `言語データ読み込み中... ${pct}%`;
+        } else if (m.status === 'initializing api') {
+          progressLabel.textContent = 'OCRエンジン初期化中...';
         }
       }
-    );
+    });
 
     const fullText = result.data.text.trim();
     const conf = Math.round(result.data.confidence);
-
-    // Extract model info
     const modelInfo = extractModelInfo(fullText);
 
-    // Display model card
     detectedModel.textContent = modelInfo;
-    modelInput.value = modelInfo;
+    textSearchInput.value = modelInfo;
     updateSearchLinks(modelInfo);
 
-    // Confidence badge
     confBadge.textContent = `精度 ${conf}%`;
     if (conf >= 70) confBadge.className = 'confidence-badge conf-high';
     else if (conf >= 40) confBadge.className = 'confidence-badge conf-mid';
@@ -902,17 +1173,10 @@ async function startOCR() {
 
     modelCard.classList.add('visible');
     modelCard.classList.add('fade-in');
-
-    // Raw text
     rawTextBox.textContent = fullText;
     rawTextSection.classList.add('visible');
-
     progressContainer.classList.remove('visible');
 
-    // Save to history
-    addToHistory(modelInfo, currentImageData, conf);
-
-    // Scroll to result
     setTimeout(() => {
       modelCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }, 100);
@@ -928,15 +1192,9 @@ async function startOCR() {
   }
 }
 
-// ===== Update search links when input changes =====
-modelInput.addEventListener('input', function() {
-  updateSearchLinks(this.value);
-  detectedModel.textContent = this.value;
-});
-
 // ===== Copy model =====
 function copyModel() {
-  const text = modelInput.value || detectedModel.textContent;
+  const text = detectedModel.textContent;
   if (!text) return;
 
   navigator.clipboard.writeText(text).then(() => {
@@ -957,32 +1215,20 @@ function copyModel() {
   });
 }
 
-// ===== Raw text toggle =====
 function toggleRawText() {
   rawToggle.classList.toggle('open');
   rawTextBox.classList.toggle('open');
 }
 
 // ===== History =====
-function addToHistory(model, imageData, confidence) {
-  // Store thumbnail (resize to save memory)
-  const thumbData = createThumbnail(imageData);
-
+function addToHistory(label, imageData) {
   scanHistory.unshift({
-    model: model,
-    thumb: thumbData,
-    confidence: confidence,
+    model: label,
+    thumb: imageData,
     timestamp: new Date().toLocaleString('ja-JP'),
     date: Date.now()
   });
-
-  // Keep max 50 items
   if (scanHistory.length > 50) scanHistory.pop();
-}
-
-function createThumbnail(dataUrl) {
-  // For memory efficiency, just store the original (in real app, resize with canvas)
-  return dataUrl;
 }
 
 function renderHistory() {
@@ -1001,7 +1247,7 @@ function renderHistory() {
   clearBtn.style.display = 'block';
 
   list.innerHTML = scanHistory.map((item, i) => `
-    <div class="history-item" onclick="searchFromHistory(${i})">
+    <div class="history-item" onclick="loadFromHistory(${i})">
       <img class="thumb" src="${item.thumb}" alt="">
       <div class="info">
         <div class="model-name">${escapeHtml(item.model)}</div>
@@ -1012,32 +1258,29 @@ function renderHistory() {
   `).join('');
 }
 
-function searchFromHistory(index) {
+function loadFromHistory(index) {
   const item = scanHistory[index];
   if (!item) return;
 
-  // Switch to scan page and populate
   switchPage('scan');
-  detectedModel.textContent = item.model;
-  modelInput.value = item.model;
-  updateSearchLinks(item.model);
-  modelCard.classList.add('visible');
-  rawTextSection.classList.remove('visible');
-
-  if (item.thumb) {
-    preview.src = item.thumb;
-    preview.style.display = 'block';
-    placeholder.style.display = 'none';
-    captureArea.classList.add('has-image');
-  }
+  currentImageData = item.thumb;
+  preview.src = currentImageData;
+  preview.style.display = 'block';
+  placeholder.style.display = 'none';
+  captureArea.classList.add('has-image');
+  imageSearchSection.classList.add('visible');
+  textDivider.style.display = '';
+  textSearchSection.classList.add('visible');
+  ocrToggleSection.classList.add('visible');
+  tips.style.display = 'none';
 
   setTimeout(() => {
-    modelCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    imageSearchSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }, 100);
 }
 
 function clearHistory() {
-  if (confirm('読み取り履歴をすべて削除しますか？')) {
+  if (confirm('検索履歴をすべて削除しますか？')) {
     scanHistory = [];
     renderHistory();
   }
@@ -1051,3 +1294,4 @@ function escapeHtml(text) {
 </script>
 </body>
 </html>
+
